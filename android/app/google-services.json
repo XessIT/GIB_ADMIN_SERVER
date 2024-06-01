@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "747858025005",
+    "project_id": "giberode-9eaf1",
+    "storage_bucket": "giberode-9eaf1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747858025005:android:c80d31273bb54bad8eb6a4",
+        "android_client_info": {
+          "package_name": "com.example.gib"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "747858025005-7oh6amvtmlbuc9uegd4q2vfq60235dnd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3YXNjuQIZfl95kWIyVvgdIvx8iuLGdig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "747858025005-7oh6amvtmlbuc9uegd4q2vfq60235dnd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "747858025005-da4vptbeu0caqk966eqrjdl5sbgud2bi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gib"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747858025005:android:0686c5cc9c43f0b08eb6a4",
+        "android_client_info": {
+          "package_name": "com.example.gibadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "747858025005-7oh6amvtmlbuc9uegd4q2vfq60235dnd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3YXNjuQIZfl95kWIyVvgdIvx8iuLGdig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "747858025005-7oh6amvtmlbuc9uegd4q2vfq60235dnd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "747858025005-da4vptbeu0caqk966eqrjdl5sbgud2bi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gib"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
