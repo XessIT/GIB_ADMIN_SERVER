@@ -111,22 +111,23 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
         List<Map<String, dynamic>> result = [];
 
         groupedEvents.forEach((key, value) {
-          List<String> imagePaths = [];
+          List<Map<String, dynamic>> imagePaths = [];
+
           value.forEach((element) {
-            imagePaths.addAll(element['imagepaths'].cast<String>());
+            imagePaths
+                .add({"id": element['id'], "path": element["imagepaths"]});
           });
 
           Map<String, dynamic> groupedObject = {
             'event_name': key,
             'selectedDate': value[0]['selectedDate'],
-            'id': value[0]['id'],
             'imagepaths': imagePaths,
           };
 
           result.add(groupedObject);
         });
 
-        print("Group : $result");
+        print("Group Baby : $result");
 
         setState(() {
           _imageGroups = result;
@@ -139,15 +140,16 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
     }
   }
 
-  Future<void> deleteImage(int imageId) async {
+  Future<void> deleteImage(dynamic imageId) async {
     try {
-      print("delete calls");
       final url =
           Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibimagefetch.php');
       print('Deleting image with URL: $url');
 
+      // Create a JSON object with the image ID
       Map<String, dynamic> jsonData = {'id': imageId};
 
+      // Send the DELETE request to your PHP script
       final response = await http.delete(
         url,
         headers: <String, String>{
@@ -163,7 +165,6 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
           ),
         );
         print('Image deleted successfully');
-        _fetchImages(); // Refresh the list after deletion
       } else {
         throw Exception(
             'Failed to delete image. Status code: ${response.statusCode}');
@@ -178,7 +179,7 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
     }
   }
 
-  Future<void> _showDeleteConfirmationDialog(int imageId) async {
+  Future<void> _showDeleteConfirmationDialog(dynamic imageId) async {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -187,12 +188,12 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
           content: Text("Are you sure you want to delete this image?"),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(context).pop(false),
               child: Text("Cancel"),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(true);
                 deleteImage(imageId);
               },
               child: Text("Delete"),
@@ -253,8 +254,12 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
                     ),
                     itemCount: group['imagepaths']?.length ?? 0,
                     itemBuilder: (context, imageIndex) {
-                      final imagePath = group['imagepaths']?[imageIndex] ?? '';
-                      final imageName = imagePath.split('/').last;
+                      final imagePath =
+                          group['imagepaths']?[imageIndex]?['path'] ?? '';
+                      final imageId =
+                          group['imagepaths']?[imageIndex]?['id'] ?? '';
+
+                      print('image id => $imageId');
 
                       return Stack(
                         children: [
@@ -296,8 +301,8 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
                                   // Implement details action here
                                   // For example: showDetails(imagePath);
                                 } else if (value == 'delete') {
-                                  _showDeleteConfirmationDialog(
-                                      group['id'] as int);
+                                  print("Image Id for Delete $imageId");
+                                  _showDeleteConfirmationDialog(imageId);
                                 }
                               },
                             ),
@@ -398,6 +403,7 @@ class _ViewVideosPageState extends State<ViewVideosPage> {
       ),
     );
   }
+
   bool isLoading = true;
 
   @override
@@ -409,7 +415,6 @@ class _ViewVideosPageState extends State<ViewVideosPage> {
         isLoading = false; // Hide the loading indicator after 4 seconds
       });
     });
-
   }
 
   @override
@@ -418,7 +423,6 @@ class _ViewVideosPageState extends State<ViewVideosPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text('View Videos'),
-
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -439,110 +443,115 @@ class _ViewVideosPageState extends State<ViewVideosPage> {
           ),
         ],
       ),
-      body: isLoading ? Center(child: CircularProgressIndicator()) :
-      _groupedVideos.isEmpty
-          ? Center(child: Text('No videos found'))
-          : ListView.builder(
-              itemCount: _groupedVideos.length,
-              itemBuilder: (context, index) {
-                final group = _groupedVideos[index];
-                final eventName = group['event_name'];
-                final selectedDate = group['selectedDate'];
-                final videos = group['videos'];
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _groupedVideos.isEmpty
+              ? Center(child: Text('No videos found'))
+              : ListView.builder(
+                  itemCount: _groupedVideos.length,
+                  itemBuilder: (context, index) {
+                    final group = _groupedVideos[index];
+                    final eventName = group['event_name'];
+                    final selectedDate = group['selectedDate'];
+                    final videos = group['videos'];
 
-                return Card(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Event Name: $eventName'),
-                            Container(
-                              decoration: const BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(10.0),
-                                  bottomRight: Radius.circular(10.0),
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6.0, vertical: 2.0),
-                              child: Text('Date: $selectedDate'),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3, // 3 photos in a row
-                            childAspectRatio: 16 / 9,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                          ),
-                          itemCount: videos.length,
-                          itemBuilder: (context, videoIndex) {
-                            final video = videos[videoIndex];
-                            return GestureDetector(
-                              onLongPress: () =>
-                                  _deleteVideo(videoIndex, index),
-                              onTap: () => _playVideo(video['videos_path']),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Stack(
-                                      children: [
-                                        Center(
-                                          child: CircleAvatar(
-                                            radius: 80, // Adjust the radius as needed
-                                            backgroundImage: AssetImage('assets/vd player.png'),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 8,
-                                          right: 8,
-                                          child: PopupMenuButton<String>(
-                                            onSelected: (value) {
-                                              if (value == 'delete') {
-                                                _deleteVideo(videoIndex, index);
-                                              }
-                                            },
-                                            itemBuilder: (context) => [
-                                              PopupMenuItem(
-                                                value: 'delete',
-                                                child: Text('Delete'),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
+                    return Card(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Event Name: $eventName'),
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10.0),
+                                      bottomRight: Radius.circular(10.0),
                                     ),
                                   ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    video['videos_name'],
-                                    style: TextStyle(fontSize: 14),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6.0, vertical: 2.0),
+                                  child: Text('Date: $selectedDate'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: GridView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3, // 3 photos in a row
+                                childAspectRatio: 16 / 9,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
                               ),
-                            );
-                          },
-                        ),
+                              itemCount: videos.length,
+                              itemBuilder: (context, videoIndex) {
+                                final video = videos[videoIndex];
+                                return GestureDetector(
+                                  onLongPress: () =>
+                                      _deleteVideo(videoIndex, index),
+                                  onTap: () => _playVideo(video['videos_path']),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Stack(
+                                          children: [
+                                            Center(
+                                              child: CircleAvatar(
+                                                radius:
+                                                    80, // Adjust the radius as needed
+                                                backgroundImage: AssetImage(
+                                                    'assets/vd player.png'),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: 8,
+                                              right: 8,
+                                              child: PopupMenuButton<String>(
+                                                onSelected: (value) {
+                                                  if (value == 'delete') {
+                                                    _deleteVideo(
+                                                        videoIndex, index);
+                                                  }
+                                                },
+                                                itemBuilder: (context) => [
+                                                  PopupMenuItem(
+                                                    value: 'delete',
+                                                    child: Text('Delete'),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        video['videos_name'],
+                                        style: TextStyle(fontSize: 14),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    );
+                  },
+                ),
     );
   }
 }
