@@ -99,8 +99,8 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
 
   Future<void> _fetchImages() async {
     try {
-      final url = Uri.parse(
-          'http://mybudgetbook.in/GIBADMINAPI/gibimagefetch.php');
+      final url =
+          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibimagefetch.php');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -141,8 +141,9 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
 
   Future<void> deleteImage(int imageId) async {
     try {
-      final url = Uri.parse(
-          'http://mybudgetbook.in/GIBADMINAPI/gibimagefetch.php');
+      print("delete calls");
+      final url =
+          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibimagefetch.php');
       print('Deleting image with URL: $url');
 
       Map<String, dynamic> jsonData = {'id': imageId};
@@ -186,13 +187,13 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
           content: Text("Are you sure you want to delete this image?"),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () => Navigator.of(context).pop(),
               child: Text("Cancel"),
             ),
             TextButton(
               onPressed: () {
+                Navigator.of(context).pop();
                 deleteImage(imageId);
-                Navigator.of(context).pop(true);
               },
               child: Text("Delete"),
             ),
@@ -326,8 +327,8 @@ class _ViewVideosPageState extends State<ViewVideosPage> {
   List<Map<String, dynamic>> _groupedVideos = [];
 
   Future<void> _fetchVideos() async {
-    final url = Uri.parse(
-        'http://mybudgetbook.in/GIBADMINAPI/gibvideosfetch.php');
+    final url =
+        Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibvideosfetch.php');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -364,8 +365,8 @@ class _ViewVideosPageState extends State<ViewVideosPage> {
     );
 
     if (confirmDelete == true) {
-      final deleteUrl = Uri.parse(
-          'http://mybudgetbook.in/GIBADMINAPI/gibvideosfetch.php');
+      final deleteUrl =
+          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibvideosfetch.php');
       final deleteResponse = await http.delete(
         deleteUrl,
         headers: <String, String>{
