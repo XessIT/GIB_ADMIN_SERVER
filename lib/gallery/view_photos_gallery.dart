@@ -398,18 +398,27 @@ class _ViewVideosPageState extends State<ViewVideosPage> {
       ),
     );
   }
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _fetchVideos();
+    Future.delayed(Duration(seconds: 1), () {
+      setState(() {
+        isLoading = false; // Hide the loading indicator after 4 seconds
+      });
+    });
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text('View Videos'),
+
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -430,8 +439,9 @@ class _ViewVideosPageState extends State<ViewVideosPage> {
           ),
         ],
       ),
-      body: _groupedVideos.isEmpty
-          ? Center(child: CircularProgressIndicator())
+      body: isLoading ? Center(child: CircularProgressIndicator()) :
+      _groupedVideos.isEmpty
+          ? Center(child: Text('No videos found'))
           : ListView.builder(
               itemCount: _groupedVideos.length,
               itemBuilder: (context, index) {
@@ -490,14 +500,11 @@ class _ViewVideosPageState extends State<ViewVideosPage> {
                                   Expanded(
                                     child: Stack(
                                       children: [
-                                        Image.network(
-                                          video['thumbnail_path'],
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Icon(Icons.error),
+                                        Center(
+                                          child: CircleAvatar(
+                                            radius: 80, // Adjust the radius as needed
+                                            backgroundImage: AssetImage('assets/vd player.png'),
+                                          ),
                                         ),
                                         Positioned(
                                           top: 8,
