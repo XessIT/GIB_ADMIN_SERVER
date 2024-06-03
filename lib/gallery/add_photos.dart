@@ -124,6 +124,8 @@ class _ImageAddState extends State<ImageAdd> {
   final _formKey = GlobalKey<FormState>();
   final eventNameController = TextEditingController();
   final dateController = TextEditingController();
+  bool isLoading = false;
+
 
   List<XFile> selectedImages = [];
   final picker = ImagePicker();
@@ -145,6 +147,10 @@ class _ImageAddState extends State<ImageAdd> {
   }
 
   Future<void> _uploadImages() async {
+    setState(() {
+      isLoading = true;
+    });
+
     if (_formKey.currentState!.validate() && selectedImages.isNotEmpty) {
       for (var image in selectedImages) {
         try {
@@ -176,6 +182,10 @@ class _ImageAddState extends State<ImageAdd> {
                   ),
                 ],
               );});
+            setState(() {
+              isLoading = false;
+            });
+
           } else {
             print('Failed to upload image. Status code: ${response.statusCode}');
           }
@@ -291,7 +301,7 @@ class _ImageAddState extends State<ImageAdd> {
                   child: const Text('Select Images from Gallery'),
                   onPressed: _pickImages,
                 ),
-                ElevatedButton(
+                isLoading ? CircularProgressIndicator() :ElevatedButton(
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(selectedImages.isNotEmpty ? Colors.blue : Colors.grey), // Change color based on images selection
                   ),
