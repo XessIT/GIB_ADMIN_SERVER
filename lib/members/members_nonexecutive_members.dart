@@ -63,31 +63,10 @@ class _ViewNonExecutivePageState extends State<ViewNonExecutivePage> {
       print("Response: ${response.body}");
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        print("gib members ResponseData: $responseData");
-        if (responseData is List) {
-          // Filter out members with member_type "Guest" and "Non-Executive"
-          final List<dynamic> itemGroups = responseData.where((item) {
-            return item['admin_rights'] != 'Waiting' && item['admin_rights'] != 'Rejected';
-          }).toList();
-
-          setState(() {
-            data = itemGroups.cast<Map<String, dynamic>>();
-          });
-          print('gib members Data: $data');
-        } else if (responseData is Map && responseData.containsKey('message')) {
-          print('Message: ${responseData['message']}');
-        } else {
-          print('Error: Unexpected response type ${responseData.runtimeType}');
-        }
-      } else {
-        print('Error: ${response.statusCode}');
-      }
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
         print("ResponseData: $responseData");
       //  final List<dynamic> itemGroups = responseData;
         final List<dynamic> itemGroups = responseData.where((item) {
-          return item['admin_rights'] != 'Waiting' && item['admin_rights'] != 'Rejected';
+          return item['admin_rights'] == 'Accepted' && item['block_status'] == 'UnBlock';
         }).toList();
         setState(() {
           data = itemGroups.cast<Map<String, dynamic>>();
@@ -221,99 +200,6 @@ class _ViewNonExecutivePageState extends State<ViewNonExecutivePage> {
                                       ),
                                     ),
 
-                                    /*Container(
-                                              child: SingleChildScrollView(
-                                                  scrollDirection: Axis.horizontal,
-                                                child: Table(
-                                                  border: TableBorder.all(),
-                                                  defaultColumnWidth: const FixedColumnWidth(190.0),
-                                                  columnWidths: const<int, TableColumnWidth>{
-                                                    0:FixedColumnWidth(70),2:FixedColumnWidth(100), 5:FixedColumnWidth(70)},
-                                                  //  5:FixedColumnWidth(140),},
-                                                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                                  children: [
-                                                    TableRow(
-                                                        children: [
-                                                          //s.no
-                                                          TableCell(child: Center(child: Column(children: [
-                                                            const SizedBox(height: 8,),
-                                                            Text('S.No', style: Theme
-                                                                .of(context)
-                                                                .textTheme
-                                                                .headlineMedium),
-                                                            const SizedBox(height: 8,),
-                                                          ],),)),
-                                                          //name
-                                                          TableCell(child: Center(child: Text('Name', style: Theme
-                                                              .of(context)
-                                                              .textTheme
-                                                              .headlineMedium),),),
-                                                          // user id
-                                                          TableCell(child: Center(child: Text('User Id', style: Theme
-                                                              .of(context)
-                                                              .textTheme
-                                                              .headlineMedium),),),
-                                                          // email
-                                                          TableCell(child: Center(child: Text('Email', style: Theme
-                                                              .of(context)
-                                                              .textTheme
-                                                              .headlineMedium),),),
-                                                          // mobile
-                                                          TableCell(child: Center(child: Text('Mobile', style: Theme
-                                                              .of(context)
-                                                              .textTheme
-                                                              .headlineMedium),),),
-                                                          // Edit
-                                                          TableCell(child:  Center(child: Text('Edit', style: Theme.of(context).textTheme.headlineMedium),),),
-                                                        ]
-                                                    ),
-                                                    for (var i = 0; i < data.length; i++) ...[
-                                                      if( data[i]["first_name"].toString().toLowerCase().startsWith(name.toLowerCase()))
-
-                                                      //   if( storedocs[i]["Company Name"].toString().toLowerCase().startsWith(name.toLowerCase()))
-
-                                                        TableRow(
-                                                            decoration: BoxDecoration(color: Colors.grey[200]),
-                                                            children:[
-                                                              //s.no
-                                                              TableCell(child:Row(
-                                                                children: [
-                                                                  //       const SizedBox(width: 4,),
-                                                                  //   IconButton( onPressed: () {}, icon:const Icon(Icons.add_circle,color: Colors.blue,)),
-                                                                  // const SizedBox(width: 8,),
-                                                                  Text("     "'${i+1}',),
-                                                                  const SizedBox(width: 4,),
-                                                                ],
-                                                              ),),
-                                                              // name
-                                                              TableCell(child:Center(child: Column(children:  [ const SizedBox(height: 8,), Text('${data[i]["first_name"]}',), const SizedBox(height: 8,),])),),
-                                                              //User id
-                                                              const TableCell(child:Center(child: Text('2345678',)),),
-                                                              // email
-                                                              TableCell(child:Center(child: Text('${data[i]["email"]}',),),),
-                                                              //mobile
-                                                              TableCell(child:Center(child: Text('${data[i]["mobile"]}',),),),
-                                                              TableCell(child: Center(
-                                                                child: Column(
-                                                                  children:  [
-                                                                    const SizedBox(height: 8,),
-                                                                    IconButton(onPressed: (){
-                                                                      Navigator.push(context,
-                                                                          MaterialPageRoute(builder: (context) =>  UpdateRegisterationPage(currentID: data[i]["id"])));
-                                                                    },
-                                                                        icon:const Icon(Icons.edit_note,color: Colors.blue,)),
-                                                                    const SizedBox(height: 8,),
-                                                                  ],),)),
-
-                                                            ]
-                                                        ),
-
-
-                                                    ]
-                                                  ],
-                                                ),
-                                                // Table end
-                                              ))*/
 
                                   ]
                               ),)))

@@ -70,6 +70,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   ///member category
   List<Map<String, dynamic>> data=[];
+  List<Map<String, dynamic>> categoryData=[];
 
   Future<void> getData(String districts, String chapters, String member_type, String fromYear, String toYear) async {
     print('Attempting to make HTTP request...');
@@ -99,6 +100,37 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         } else {
           print('Error: Unexpected response type ${responseData.runtimeType}');
         }
+      } else {
+        print('Error: ${response.statusCode}');
+      }
+      print('HTTP request completed. Status code: ${response.statusCode}');
+    } catch (e) {
+      print('Error making HTTP request: $e');
+      throw e; // rethrow the error if needed
+    }
+  }
+
+  Future<void> getMemberCategory(String districts, String chapters, String member_type) async {
+    print('Attempting to make HTTP request...');
+    try {
+      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/subscription.php?table=member_category&district=$districts&chapter=$chapters&member_type=$member_type');
+      print("gib members url =$url");
+      final response = await http.get(url);
+      print("gib members ResponseStatus: ${response.statusCode}");
+      print("gib members Response: ${response.body}");
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print("gib members ResponseData: $responseData");
+
+        // Filter out members with member_type "Guest" and "Non-Executive"
+        final List<dynamic> itemGroups = responseData.where((item) {
+          return item['member_type'] != 'Guest' && item['member_type'] != 'Non-Executive';
+        }).toList();
+
+        setState(() {
+          categoryData = itemGroups.cast<Map<String, dynamic>>();
+        });
+        print('gib members Data: $categoryData');
       } else {
         print('Error: ${response.statusCode}');
       }
@@ -165,12 +197,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   /// data store
-  Future<void> dataStroetoSubscription () async {
+  Future<void> dataStroetoSubscription() async {
     try {
-      String url = "http://mybudgetbook.in/GIBADMINAPI/subscription.php?table=AddSubscription";
-      print("store url :$url");
+      String url = "http://mybudgetbook.in/GIBADMINAPI/create_subscription.php?table=AddSubscription";
+      print("store url: $url");
       print("from_year text: ${fromyear.text}");
       print("to_year text: ${toyear.text}");
+
       DateTime fromDate = DateFormat('dd/MM/yyyy').parse(fromyear.text);
       DateTime toDate = DateFormat('dd/MM/yyyy').parse(toyear.text);
       DateTime schedule = DateFormat('dd/MM/yyyy').parse(scheduledate.text);
@@ -178,38 +211,50 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       // Format the parsed dates to "yyyy-MM-dd" format
       String fromYearFormatted = DateFormat('yyyy-MM-dd').format(fromDate);
       String toYearFormatted = DateFormat('yyyy-MM-dd').format(toDate);
-      String scheduledateformatted = DateFormat('yyyy-MM-dd').format(schedule);
+      String scheduleDateFormatted = DateFormat('yyyy-MM-dd').format(schedule);
 
-      var res = await http.post(Uri.parse(url),
-          body: jsonEncode( {
-        "member_category": membercategor.text,
-            "from_year": fromYearFormatted,
-            "to_year": toYearFormatted,
-        "member_type":membertype.text.trim(),
-        "subscription_amount":subscriptionamount.text.trim(),
-        "schedule_date":scheduledateformatted,
-        "district":districtController.text.trim(),
-        "chapter":chapterController.text.trim(),
-        "current_date": DateTime.now().toIso8601String(), // Convert DateTime to String
-      }));
+      var res = await http.post(
+        Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: jsonEncode({
+          "member_category": membercategor.text,
+          "from_year": fromYearFormatted,
+          "to_year": toYearFormatted,
+          "member_type": membertype.text.trim(),
+          "subscription_amount": subscriptionamount.text.trim(),
+          "schedule_date": scheduleDateFormatted,
+          "district": districtController.text.trim(),
+          "chapter": chapterController.text.trim(),
+          "current_date": DateTime.now().toIso8601String(), // Convert DateTime to String
+        }),
+      );
+
       if (res.statusCode == 200) {
         print(url);
         print("store Status: ${res.statusCode}");
         print("store Body: ${res.body}");
         var response = jsonDecode(res.body);
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>const SubscriptionPage()));
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Subscription Submitted Successfully ")));
+        if (response["Success"] == true) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionPage()));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Subscription Submitted Successfully")));
           print("Subscription Server response: ${response["message"]}");
-
+        } else {
+          print("Error: ${response["Error"]}");
+        }
       } else {
-        print("Failed to Subscription Server returned status code: ${res.statusCode}");
+        print("Failed to Subscription. Server returned status code: ${res.statusCode}");
       }
     } catch (e) {
       print("Error Subscription: $e");
     }
   }
 
+
+
   List<Map<String, dynamic>> memberSuggestion = [];
+
   Future<void> getMemberType() async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/member_type.php');
@@ -220,6 +265,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         setState(() {
           memberSuggestion = itemGroups.cast<Map<String, dynamic>>();
         });
+        print("member -- $memberSuggestion");
       } else {
         //print('Error: ${response.statusCode}');
       }
@@ -230,9 +276,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   List<Map<String, dynamic>> suggesstiondata = [];
   List district = [];
+
+
   Future<void> getDistrict() async {
     try {
-      final url = Uri.parse('http://localhost/GIBAPI/district.php');
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/district.php');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -254,7 +302,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   List<Map<String, dynamic>> suggesstiondataitemName = [];
   Future<void> getchapter(String district) async {
     try {
-      final url = Uri.parse('http://localhost/GIBAPI/chapter.php?district=$district'); // Fix URL
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/chapter.php?district=$district'); // Fix URL
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -554,7 +602,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
                             print("form year : $formattedFromYear & $formattedToYear");
                             getData(districtController.text, chapterController.text, suggestion, formattedFromYear, formattedToYear);
-                            print("member_category--: $data");
+                            getMemberCategory(districtController.text, chapterController.text, suggestion,);
+                            print("member_category--: $categoryData");
                           });
                           //   print('Selected Item Group: $suggestion');
                         },
@@ -584,7 +633,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         ),
                         suggestionsCallback: (pattern) async {
                           return
-                            data
+                            categoryData
                               .where((item) =>
                               (item['member_category']?.toString().toLowerCase() ?? '')
                                   .startsWith(pattern.toLowerCase()))
@@ -605,7 +654,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         },
                       ),
                     ),
-
                   ],
                                 ),
                                 //schedule Date & Waring From Text
