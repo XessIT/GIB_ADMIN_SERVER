@@ -171,18 +171,20 @@ class _ImageAddState extends State<ImageAdd> {
 
           if (response.statusCode == 200) {
 
-            Navigator.pushNamed(context, '/add_photos');
+
             showDialog(context: context, builder: (BuildContext context) {
               return AlertDialog(
                 title: Text('Success!'),
                 content: Text('Your Image(s) have been uploaded successfully.'),
                 actions: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context), // Close dialog
+                    onPressed: () =>    Navigator.pushNamed(context, '/add_photos'), // Close dialog
                     child: Text('OK'),
                   ),
                 ],
               );});
+
+
           } else {
             print('Failed to upload image. Status code: ${response.statusCode}');
           }

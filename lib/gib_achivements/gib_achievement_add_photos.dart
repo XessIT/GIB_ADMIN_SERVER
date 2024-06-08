@@ -167,7 +167,7 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
           );
 
           if (response.statusCode == 200) {
-            Navigator.pushNamed(context, '/gib_achieve_add_photos');
+
 
             showDialog(context: context, builder: (BuildContext context) {
               return AlertDialog(
@@ -175,7 +175,7 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
                 content: Text('Your Image(s) have been uploaded successfully.'),
                 actions: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context), // Close dialog
+                    onPressed: () =>  Navigator.pushNamed(context, '/gib_achieve_add_photos'), // Close dialog
                     child: Text('OK'),
                   ),
                 ],
