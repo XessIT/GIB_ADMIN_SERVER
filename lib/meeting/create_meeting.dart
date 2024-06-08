@@ -46,7 +46,9 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
     Member(id: 3, name: "Executive "),
     Member(id: 4, name: "NonExecutive"),
     Member(id: 5, name: "Women's Wing"),
-    Member(id: 6, name: "All of the above"),  ];
+    Member(id: 6, name: "All of the above"),
+  ];
+
   final _items = _members
       .map((members) => MultiSelectItem<Member>(members, members.name))
       .toList();
@@ -135,7 +137,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   List district = [];
   Future<void> getDistrict() async {
     try {
-      final url = Uri.parse('http://localhost/GIB/lib/GIBAPI/district.php');
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/district.php');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -156,7 +158,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   List<Map<String, dynamic>> suggesstiondataitemName = [];
   Future<void> getChapter(String district) async {
     try {
-      final url = Uri.parse('http://localhost/GIB/lib/GIBAPI/chapter.php?district=$district'); // Fix URL
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/chapter.php?district=$district'); // Fix URL
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -646,7 +648,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   },
                                   validator: (value) {
                                     if (_selectedMemberTypes.isEmpty) {
-                                      return 'Please select at least one member type';
+                                      return 'Select at least one member type';
                                     }
                                     return null;
                                   },

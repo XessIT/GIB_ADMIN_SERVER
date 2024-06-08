@@ -75,6 +75,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                            echo json_encode(array("message" => "Missing parameters"));
                        }
                    }
+                   else if ($table == "member_category") {
+                                           if (isset($_GET['member_type']) && isset($_GET['chapter']) && isset($_GET['district'])) {
+                                               $district = mysqli_real_escape_string($conn, $_GET['district']);
+                                               $chapter = mysqli_real_escape_string($conn, $_GET['chapter']);
+                                               $member_type = mysqli_real_escape_string($conn, $_GET['member_type']);
+
+                                               $userlist = "SELECT DISTINCT member_category FROM member_category WHERE district = '$district' AND chapter = '$chapter' AND member_type = '$member_type'";
+                                               $userResult = mysqli_query($conn, $userlist);
+                                               if ($userResult && mysqli_num_rows($userResult) > 0) {
+                                                   $users = array();
+                                                   while ($row = mysqli_fetch_assoc($userResult)) {
+                                                       $users[] = $row;
+                                                   }
+                                                   echo json_encode($users);
+                                               } else {
+                                                   echo json_encode(array("message" => "No users found"));
+                                               }
+                                           } else {
+                                               echo json_encode(array("message" => "Missing parameters"));
+                                           }
+                                       }
                else if($table == "registration"){
                $member_id = isset($_GET['member_id']) ? mysqli_real_escape_string($conn, $_GET['member_id']) : "";
                $mobile = isset($_GET['mobile']) ? mysqli_real_escape_string($conn, $_GET['mobile']) : "";

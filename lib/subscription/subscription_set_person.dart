@@ -96,48 +96,6 @@ class _SetPersonSubscrptionState extends State<SetPersonSubscrption> {
   }
 
 
-
-  // Future<void> getMemberType() async {
-  //   try {
-  //     final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/member_type.php');
-  //     final response = await http.get(url);
-  //     if (response.statusCode == 200) {
-  //       final responseData = json.decode(response.body);
-  //       final List<dynamic> itemGroups = responseData;
-  //       setState(() {
-  //         memberSuggestion = itemGroups.cast<Map<String, dynamic>>();
-  //       });
-  //     } else {
-  //       //print('Error: ${response.statusCode}');
-  //     }
-  //   } catch (error) {
-  //     //  print('Error: $error');
-  //   }
-  // }
-
-  // List<Map<String, dynamic>> categoryData = [];
-  // Future<void> getMemberCategory() async {
-  //   try {
-  //     final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/subscription.php?table=member_category');
-  //     print('member_category_url :$url');
-  //     final response = await http.get(url);
-  //     if (response.statusCode == 200) {
-  //       final responseData = json.decode(response.body);
-  //       final List<dynamic> member = responseData;
-  //       print("Cat-status code :${response.statusCode}");
-  //       print("Cat-response body :${response.body}");
-  //       setState(() {
-  //         categoryData = member.cast<Map<String, dynamic>>();
-  //         print("member_category--: $categoryData");
-  //
-  //       });
-  //     } else {
-  //       print('Error: ${response.statusCode}');
-  //     }
-  //   } catch (error) {
-  //     print('Error: $error');
-  //   }
-  // }
   String memberID = "";
   String member_name = "";
   String userID = "";
@@ -193,7 +151,6 @@ class _SetPersonSubscrptionState extends State<SetPersonSubscrption> {
               scheduleDateController.text = responseData['schedule_date'];
               dueDateController.text = responseData['to_year'];
             });
-
             print('Subscription Amount: ${subscriptionamount.text}');
             print('Schedule Date: ${scheduleDateController.text}');
             print('Due Date: ${dueDateController.text}');
