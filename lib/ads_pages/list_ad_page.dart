@@ -32,8 +32,8 @@ class _ListAdsPageState extends State<ListAdsPage> {
   Future<void> getData() async {
     print('Attempting to fetch data...');
     try {
-      final url = Uri.parse(
-          'http://mybudgetbook.in/GIBADMINAPI/ads.php?table=ads');
+      final url =
+          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php?table=ads');
       print('Request URL: $url');
       final response = await http.get(url);
       print("ResponseStatus: ${response.statusCode}");
