@@ -98,45 +98,26 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
   List<Map<String, dynamic>> _imageGroups = [];
 
   Future<void> _fetchImages() async {
-    try {
-      final url =
-          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibimagefetch.php');
-      final response = await http.get(url);
+    final url =
+        Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibimagefetch.php');
+    print('123$url');
+    final response = await http.get(url);
 
-      if (response.statusCode == 200) {
-        List<dynamic> imageData = jsonDecode(response.body);
-        Map<String, List<dynamic>> groupedEvents =
-            groupBy(imageData, (obj) => obj['event_name']);
+    if (response.statusCode == 200) {
+      List<dynamic> imageData = jsonDecode(response.body);
 
-        List<Map<String, dynamic>> result = [];
-
-        groupedEvents.forEach((key, value) {
-          List<Map<String, dynamic>> imagePaths = [];
-
-          value.forEach((element) {
-            imagePaths
-                .add({"id": element['id'], "path": element["imagepaths"]});
-          });
-
-          Map<String, dynamic> groupedObject = {
-            'event_name': key,
-            'selectedDate': value[0]['selectedDate'],
-            'imagepaths': imagePaths,
+      setState(() {
+        _imageGroups = imageData.map((data) {
+          return {
+            'event_name': data['event_name'],
+            'selectedDate': data['selectedDate'],
+            'imagepaths': data['imagepaths'],
+            'id': int.parse(data['id']),
           };
-
-          result.add(groupedObject);
-        });
-
-        print("Group Baby : $result");
-
-        setState(() {
-          _imageGroups = result;
-        });
-      } else {
-        throw Exception('Failed to fetch images');
-      }
-    } catch (e) {
-      print('Error fetching images: $e');
+        }).toList();
+      });
+    } else {
+      print('Failed to fetch images.');
     }
   }
 
@@ -228,14 +209,14 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Event Name - ${group['event_name'] ?? 'Unknown'}',
+                        'Event Name- ${group['event_name']}',
                         style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        'Date - ${group['selectedDate'] ?? 'Unknown'}',
+                        'Date - ${group['selectedDate']}',
                         style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.bold,
@@ -243,71 +224,72 @@ class _ViewPhotosPageState extends State<ViewPhotosPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8.0),
+                  SizedBox(height: 8.0),
                   GridView.builder(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics: NeverScrollableScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 5,
                       crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 10.0,
+                      mainAxisSpacing: 15.0,
                     ),
-                    itemCount: group['imagepaths']?.length ?? 0,
+                    itemCount: group['imagepaths'].length,
                     itemBuilder: (context, imageIndex) {
-                      final imagePath =
-                          group['imagepaths']?[imageIndex]?['path'] ?? '';
-                      final imageId =
-                          group['imagepaths']?[imageIndex]?['id'] ?? '';
-
-                      print('image id => $imageId');
-
-                      return Stack(
-                        children: [
-                          Image.network(
-                            'http://mybudgetbook.in/GIBADMINAPI/$imagePath',
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) {
-                                return child;
-                              } else {
-                                return Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                            },
-                            errorBuilder: (BuildContext context,
-                                Object exception, StackTrace? stackTrace) {
+                      final imagePath = group['imagepaths'][imageIndex];
+                      return FutureBuilder(
+                        future: http.get(Uri.parse(
+                            'http://mybudgetbook.in/GIBADMINAPI/$imagePath')),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.done &&
+                              snapshot.hasData) {
+                            final imageResponse =
+                                snapshot.data as http.Response;
+                            if (imageResponse.statusCode == 200) {
+                              return Stack(
+                                children: [
+                                  Image.memory(
+                                    Uint8List.fromList(imageResponse.bodyBytes),
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                  Positioned(
+                                    top: 5,
+                                    right: 5,
+                                    child: PopupMenuButton(
+                                      itemBuilder: (BuildContext context) => [
+                                        PopupMenuItem(
+                                          value: 'details',
+                                          child: Text('Details'),
+                                        ),
+                                        PopupMenuItem(
+                                          value: 'delete',
+                                          child: Text('Delete'),
+                                        ),
+                                      ],
+                                      onSelected: (value) {
+                                        if (value == 'details') {
+                                          // Implement details action here
+                                        } else if (value == 'delete') {
+                                          _showDeleteConfirmationDialog(
+                                              group['id'] as int);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            } else {
                               return Text('Error loading image');
-                            },
-                          ),
-                          Positioned(
-                            top: 5,
-                            right: 5,
-                            child: PopupMenuButton(
-                              itemBuilder: (BuildContext context) => [
-                                PopupMenuItem(
-                                  value: 'details',
-                                  child: Text('Details'),
-                                ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text('Delete'),
-                                ),
-                              ],
-                              onSelected: (value) {
-                                if (value == 'details') {
-                                  // Implement details action here
-                                  // For example: showDetails(imagePath);
-                                } else if (value == 'delete') {
-                                  print("Image Id for Delete $imageId");
-                                  _showDeleteConfirmationDialog(imageId);
-                                }
-                              },
-                            ),
-                          ),
-                        ],
+                            }
+                          } else if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          } else {
+                            return Text('Error loading image');
+                          }
+                        },
                       );
                     },
                   ),
