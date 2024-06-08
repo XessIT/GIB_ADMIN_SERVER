@@ -541,7 +541,7 @@ class _TotalIndividualReportState extends State<TotalIndividualReport> {
 
                                             ],
                                             rows: filteredBusiness.map((meeting) {
-                                              String imageUrl = 'http://mybudgetbook.in/GIBADMINAPI/${meeting['profile_image']}';
+                                              String imageUrl = 'http://mybudgetbook.in/GIBAPI/${meeting['profile_image']}';
                                               index++;
                                               return DataRow(
                                                 cells: [

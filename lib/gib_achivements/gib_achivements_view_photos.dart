@@ -187,7 +187,19 @@ class _AchievementViewPhotosPageState extends State<AchievementViewPhotosPage> {
             ),
             TextButton(
               onPressed: () {
-                deleteImage(imageId);
+                deleteImage(imageId).then((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Image deleted successfully'),
+                    ),
+                  );
+                }).catchError((error) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: Failed to delete image.'),
+                    ),
+                  );
+                });
                 Navigator.of(context).pop(true);
               },
               child: Text("Delete"),
@@ -244,11 +256,7 @@ class _AchievementViewPhotosPageState extends State<AchievementViewPhotosPage> {
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 5,
                       crossAxisSpacing: 8.0,
-
-                      /// Space between columns
                       mainAxisSpacing: 15.0,
-
-                      /// Space between rows
                     ),
                     itemCount: group['imagepaths'].length,
                     itemBuilder: (context, imageIndex) {
@@ -288,7 +296,6 @@ class _AchievementViewPhotosPageState extends State<AchievementViewPhotosPage> {
                                       onSelected: (value) {
                                         if (value == 'details') {
                                           // Implement details action here
-                                          // For example: showDetails(imagePath);
                                         } else if (value == 'delete') {
                                           _showDeleteConfirmationDialog(
                                               group['id'] as int);

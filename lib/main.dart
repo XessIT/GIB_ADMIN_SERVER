@@ -548,19 +548,18 @@ class _MyScaffoldState extends State<MyScaffold> {
         ]),
     //Gallery
     const AdminMenuItem(title: 'Gallery', icon: Icons.photo_album, children: [
-      AdminMenuItem(title: 'Add Photos', route: '/add_photos'),
-      AdminMenuItem(title: 'View Photos', route: "/view_images_gallery"),
+      AdminMenuItem(title: ' GIB Images', route: '/add_photos'),
+     // AdminMenuItem(title: 'View Photos', route: "/view_images_gallery"),
     ]),
     //GIB Achievements
     const AdminMenuItem(
         title: 'GIB Achievements',
         icon: Icons.photo_album,
         children: [
-          AdminMenuItem(title: 'Add Photos', route: 'gib_achieve_add_photos'),
-          AdminMenuItem(
-              title: 'View Photos',
-              route: "/gib_achievements_view_images_gallery"),
-        ]),
+          AdminMenuItem(title: 'GIB Achievements Images', route: 'gib_achieve_add_photos'),
+         // AdminMenuItem(title: 'View Photos', route: "/gib_achievements_view_images_gallery"),
+        ]
+    ),
     //Ad's
     const AdminMenuItem(title: "Ad's", icon: Icons.leak_add, children: [
       AdminMenuItem(title: "Add-Ad's", route: '/add_ads'),

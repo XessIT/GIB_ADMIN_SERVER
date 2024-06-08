@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import '../main.dart';
 
 class NewMemberApproval extends StatelessWidget {
@@ -10,7 +13,6 @@ class NewMemberApproval extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: MemberApprovaltabbarview(),
-
     );
   }
 }
@@ -49,14 +51,10 @@ class _MemberApprovaltabbarviewState extends State<MemberApprovaltabbarview> {
                 const SizedBox(height: 30,),
                 Container(
                     height:1100,
-
                     child:const TabBarView(children: [
                       NewMemberApprovalPage(),
-
-                      //  NewMemberApprovalPage(),
-                       ApprovedMemebers(),
+                      ApprovedMemebers(),
                       RejectMembers(),
-
                     ])
                 )
               ],
@@ -99,6 +97,7 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
   String? getNameFromJsonDatasalINv(Map<String, dynamic> jsonItem) {
     return jsonItem['member_id'];
   }
+  final ScrollController _scrollController = ScrollController();
   String poNumber = "";
   String? poNo;
   List<Map<String, dynamic>> ponumdata = [];
@@ -111,7 +110,7 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
     if (mID != null) {
       String ID = mID!.substring(7);
       int idInt = int.parse(ID) + 1;
-      String id = 'GI$year$month/${idInt.toString().padLeft(3, '0')}';
+      String id = 'GIB$year$month/${idInt.toString().padLeft(3, '0')}';
       print(id);
       return id;
     }
@@ -177,35 +176,29 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
     print('Attempting to make HTTP request...');
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/new_member_approval.php?admin_rights=$pending');
-      // final url = Uri.parse('http://207.174.212.202/getData.php');
-      // final url = Uri.parse('http://localhost/API/getData.php');
-
-      print(url);
       final response = await http.get(url);
       print("ResponseStatus: ${response.statusCode}");
       print("Response: ${response.body}");
-      // http.Response response = await http.get(url);
-      //  var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         print("ResponseData: $responseData");
         final List<dynamic> itemGroups = responseData;
-        setState(() {});
-        data = itemGroups.cast<Map<String, dynamic>>();
+        setState(() {
+          data = itemGroups.cast<Map<String, dynamic>>();
+          filteredData = data; // Initially set filtered data to all data
+        });
         print('Data: $data');
         print("Id: ${data[0]["id"]}");
       } else {
         print('Error: ${response.statusCode}');
       }
       print('HTTP request completed. Status code: ${response.statusCode}');
-      // var dataReceived = json.decode(response.body);
-      // print(dataReceived);
-      // return dataReceived;
     } catch (e) {
       print('Error making HTTP request: $e');
-      throw e; // rethrow the error if needed
+      throw e;
     }
   }
+
   Future<void> rejected(int ID) async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/new_member_approval.php');
@@ -250,16 +243,13 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
     }
   }
   ///
-
+  List<Map<String, dynamic>> filteredData = [];
 
   Future<void> ponumfetch() async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/new_member_approval.php');
-      // final url = Uri.parse('http://207.174.212.202/getData.php');
-      // final url = Uri.parse('http://localhost/API/getData.php');
       print("ponumurl:$url");
       final response = await http.get(url);
-  //    final response = await http.get(Uri.parse('http://mybudgetbook.in/GIBADMINAPI/new_member_approval.php'));
       if (response.statusCode == 200) {
         print("status code:${response.statusCode}");
         print("status body:${response.body}");
@@ -324,6 +314,14 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
   List<Map<String, dynamic>> srnumdata = [];
   String? gID;
   List<Map<String, dynamic>> srcodedata = [];
+  int currentPage = 0;
+  final int rowsPerPage = 15;
+  int index = 0;
+  List<Map<String, dynamic>> getCurrentPageData() {
+    final start = currentPage * rowsPerPage;
+    final end = start + rowsPerPage;
+    return data.sublist(start, end > data.length ? data.length : end);
+  }
 
   String generateId() {
     DateTime now=DateTime.now();
@@ -381,31 +379,58 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
                           const SizedBox(height: 20,),
                           Text("View New Members for Approval", style:Theme.of(context).textTheme.headlineMedium,),
                           const SizedBox(height: 20,),
-                           Row(
-                             mainAxisAlignment: MainAxisAlignment.end,
-                             children: [
-                               SizedBox(
-                                width: 300,
-                                height: 50,
-                                child: TextFormField(
-                                  onChanged: (val){         //search bar
-                                    setState(() {
-                                      firstname = val ;
-                                    });
-                                  },
-                                  decoration:  const InputDecoration(
-                                    prefixIcon: Icon(Icons.search,color: Colors.green,),
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(Radius.circular(12))
-                                    ),
-                                    hintText: 'Search ',
-                                  ),
+                           SizedBox(
+                            width: 300,
+                            height: 50,
+                            child: TextFormField(
+                              onChanged: (val){         //search bar
+                                setState(() {
+                                  filteredData = filterData(val);
+                                });
+                              },
+                              decoration:  const InputDecoration(
+                                prefixIcon: Icon(Icons.search,color: Colors.green,),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(12))
                                 ),
-                              ),]
-                           ),
+                                hintText: 'Search ',
+                              ),
+                            ),
+                                                         ),
 
                           const SizedBox(height: 20,),
-                          Container(
+
+                          Scrollbar(
+                            thumbVisibility: true,
+                            controller: _scrollController,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              controller: _scrollController,
+                              child: SizedBox(
+                                width:1000,
+                                child: PaginatedDataTable(
+                                  columnSpacing:50,
+                                  //  header: const Text("Report Details", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                  rowsPerPage:15,
+                                  columns:   const [
+                                    DataColumn(label: Center(child: Text("S.No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                    DataColumn(label: Center(child: Text("Name ",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                    DataColumn(label: Center(child: Text("Mobile No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                    DataColumn(label: Center(child: Text("Company Name",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                    DataColumn(label: Center(child: Text("Action",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                  ],
+                                  source: MyDataTableSource(
+                                    data: filteredData,
+                                    context: context,
+                                    approved: approved,
+                                    rejected: rejected,
+                                  )
+                                ),
+                              ),
+                            ),
+                          ),
+
+                       /*   Container(
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Table(
@@ -474,7 +499,8 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
                                                 child: Text("${data[i]["company_name"]}",style: Theme.of(context).textTheme.bodySmall,),
                                               )),
 
-                                              TableCell(child: IconButton(
+                                              TableCell(child:
+                                              IconButton(
 
                                                   onPressed: (){
                                                 showDialog<void>(
@@ -610,7 +636,8 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
                                                     );
                                                   },
                                                 );
-                                              }, icon: Icon(Icons.edit,color: Colors.blue,),))
+                                              }, icon: Icon(Icons.edit,color: Colors.blue,),)
+                                              )
                                              // child: const Text("Pending",style: TextStyle(color: Colors.orangeAccent),))),
                                             ]),
                                     ]
@@ -618,17 +645,201 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 40,),
+                          const SizedBox(height: 40,),*/
                         ],
                       ),
                     ),
                   ),
                 ),
+
               ],
             ),
           ),
         )
     );
+  }
+  List<Map<String, dynamic>> filterData(String searchTerm) {
+    if (searchTerm.isEmpty) {
+      return data;
+    } else {
+      return data.where((item) => item["first_name"].toLowerCase().contains(searchTerm.toLowerCase())).toList();
+    }
+  }
+}
+
+
+
+
+class MyDataTableSource extends DataTableSource {
+  List<Map<String, dynamic>> data;
+  BuildContext context;
+  final Function(int) approved;
+  final Function(int) rejected;
+
+  MyDataTableSource({required this.data, required this.context, required this.approved, required this.rejected});
+
+  @override
+  int get rowCount => data.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+
+  @override
+  DataRow getRow(int index) {
+    return DataRow(
+      cells: [
+        DataCell(Text('${index + 1}')),
+        DataCell(Text('${data[index]["first_name"]}')),
+        DataCell(Text('${data[index]["mobile"]}')),
+        DataCell(Text('${data[index]["company_name"]}')),
+        DataCell(
+        IconButton(
+          onPressed: (){
+            showDialog<void>(
+              context: context,
+              builder: (BuildContext dialogContext) {
+                return AlertDialog(
+                  backgroundColor: Colors.white,
+                  actions: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+
+                          children: [
+                            IconButton(onPressed: (){
+                              Navigator.pop(context);
+                            }, icon: Icon(Icons.cancel_presentation,color: Colors.red,))
+                          ],
+                        ),
+                        SizedBox(height: 10,),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Status"),
+                                Text("Referrer Id"),
+                                Text("Referrer Number"),
+
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text("InActive"),
+                                // Text(data[i]["Referrer Id"]),
+                                Text(data[index]["referrer_mobile"]),
+
+                              ],
+                            )
+                          ],
+                        ),
+                        SizedBox(height: 10,),
+                        Wrap(
+                          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            //  const SizedBox(width: 20,),
+                            ElevatedButton(onPressed: () async {
+                              showDialog<void>(
+                                context: context,
+                                builder: (BuildContext dialogContext) {
+                                  return AlertDialog(
+                                    title: Text("Alert"),
+                                    content: Text("Do you want to Approve the Member?"),
+                                    backgroundColor: Colors.white,
+                                    actions: <Widget>[
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Wrap(
+                                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              //  const SizedBox(width: 20,),
+                                              TextButton(onPressed: () async {
+                                                approved(int.parse(data[index]["id"]));
+                                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                                    content: Text("You have Successfully Approved")));
+                                              },
+                                                  child:  Text("Approve",style: TextStyle(fontSize: 9),)),
+                                              const SizedBox(width: 10,),
+                                              TextButton(onPressed: () async {
+                                                Navigator.pop(context);
+                                              }, child: const Text("Cancel",style: TextStyle
+                                                (fontSize: 9),)),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                                child:  Text("Approve",style: TextStyle(fontSize: 9),)),
+                            const SizedBox(width: 10,),
+                            OutlinedButton(onPressed: () async {
+                              showDialog<void>(
+                                context: context,
+                                builder: (BuildContext dialogContext) {
+                                  return AlertDialog(
+                                    title: Text("Alert"),
+                                    content: Text("Do you want to reject the member?"),
+                                    backgroundColor: Colors.white,
+                                    actions: <Widget>[
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Wrap(
+                                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              TextButton(onPressed: () async
+                                              {
+                                                rejected(int.parse(data[index]["id"]));
+                                              },
+                                                  child:  Text("Reject",style: TextStyle(fontSize: 9),)),
+                                              const SizedBox(width: 10,),
+                                              TextButton(onPressed: () async {
+                                                Navigator.pop(context);
+                                              }, child: const Text("cancel",style: TextStyle(fontSize: 9),)),
+                                            ],
+                                          ),
+
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+
+                            },
+                                child:  Text("Reject",style: TextStyle(fontSize: 9),)),
+
+                          ],
+                        ),
+
+                      ],
+                    ),
+                  ],
+                );
+              },
+            );
+          }, icon: Icon(Icons.edit,color: Colors.blue,),)
+        )
+      ],
+    );
+  }
+
+  @override
+  void rowsRefresh() {
+    // handle data refresh
   }
 }
 
@@ -656,38 +867,38 @@ class _ApprovedMemebersState extends State<ApprovedMemebers> {
   String firstname = "";
   String? currentRow;
   String? today;
+  final ScrollController _scrollController = ScrollController();
 
   List<Map<String, dynamic>> data=[];
+  List<Map<String, dynamic>> filteredData = [];
   String approved = "Accepted";
   Future<void> getData() async {
     print('Attempting to make HTTP request...');
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/new_member_approval.php?admin_rights=$approved');
-      // final url = Uri.parse('http://207.174.212.202/getData.php');
-      // final url = Uri.parse('http://localhost/API/getData.php');
-      print(url);
       final response = await http.get(url);
       print("ResponseStatus: ${response.statusCode}");
       print("Response: ${response.body}");
-      // http.Response response = await http.get(url);
-      //  var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         print("ResponseData: $responseData");
         final List<dynamic> itemGroups = responseData;
-        setState(() {});
-        data = itemGroups.cast<Map<String, dynamic>>();
+        setState(() {
+          data = itemGroups.cast<Map<String, dynamic>>();
+          filteredData = data; // Initially set filtered data to all data
+        });
         print('Data: $data');
-        print("Id: ${data[0]["ID"]}");
+        print("Id: ${data[0]["id"]}");
       } else {
         print('Error: ${response.statusCode}');
       }
       print('HTTP request completed. Status code: ${response.statusCode}');
     } catch (e) {
       print('Error making HTTP request: $e');
-      throw e; // rethrow the error if needed
+      throw e;
     }
   }
+
 
   @override
   void initState() {
@@ -731,26 +942,15 @@ class _ApprovedMemebersState extends State<ApprovedMemebers> {
                         ],
                       ),
                       const SizedBox(height: 20,),
-                    /*  // go back
-                      Align(alignment: Alignment.topRight,
-                        child: ElevatedButton(onPressed: (){
-                          if(_formKey.currentState!.validate()){}
-                          Navigator.pop(context);
-                        },
-                            child: const Text("Go back",style: TextStyle(fontSize: 9),)),
-                      ),
-
-                      //show
-                      const SizedBox(height: 15,),*/
-
-
 //Search TextFormField starts
-                      Align(alignment: Alignment.topRight,
-                        child: SizedBox(width: 380,
+                      Align(alignment: Alignment.center,
+                        child: SizedBox(
+                          width: 300,
+                          height: 50,
                           child: TextFormField(
                             onChanged: (val){         //search bar
                               setState(() {
-                                name = val ;
+                                filteredData = filterData(val);
                               });
                             },
                             decoration:  const InputDecoration(
@@ -763,111 +963,34 @@ class _ApprovedMemebersState extends State<ApprovedMemebers> {
                           ),
                         ),
                       ),
-//Search TextFormField end
                       const SizedBox(height: 20,),
-                      //Table
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Table(
-                                  border: TableBorder.all(),
-                                  defaultColumnWidth: const FixedColumnWidth(140.0),
-                                  columnWidths: const <int, TableColumnWidth>{
-                                    0:FixedColumnWidth(100),
-                                    1:FixedColumnWidth(200),
-                                    2:FixedColumnWidth(200),
-                                    4:FixedColumnWidth(200),
-                                  },
-                                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                  children:[
-                                    //Table row starting
-                                    TableRow(
-                                        children: [
-                                          TableCell(
-                                              child:Center(
-                                                child: Column(
-                                                  children: [
-                                                    const SizedBox(height: 8,),
-                                                    Text('S.No',
-                                                      style: Theme.of(context).textTheme.headlineMedium,),
-                                                    const SizedBox(height: 8,)
-                                                  ],
-                                                ),)),
-                                          //Meeting Name
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Name',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Email',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Mobile',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Company Name',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Status',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          // Edit
-                                        ]),
-                                    // Table row end
-                                    for(var i = 0 ;i < data.length; i++)...[
-                                      if(data[i]['first_name']
-                                          .toString()
-                                          .toLowerCase().startsWith(name.toLowerCase()))
-                                      //Table row start
-                                        TableRow(
-                                          // decoration: BoxDecoration(color: Colors.grey[200]),
-                                            children: [
-                                              // 1 s.no
-                                              TableCell(child: Center(child: Column(
-                                                children: [
-                                                  const SizedBox(height: 10,),
-                                                  Text("${i+1}",style: Theme.of(context).textTheme.bodySmall,),
-                                                  const SizedBox(height: 10,)
-                                                ],
-                                              ))),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["first_name"]}",style: Theme.of(context).textTheme.bodySmall,),
-                                              )
-                                              ),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["email"]}",style: Theme.of(context).textTheme.bodySmall,),
-                                              )
-                                              ),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["mobile"]}",style: Theme.of(context).textTheme.bodySmall,),
-                                              )
-                                              ),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["company_name"]}",style: Theme.of(context).textTheme.bodySmall,),
-                                              )
-                                              ),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["admin_rights"]}",style: TextStyle(color: Colors.green),),
-                                              )
-                                              ),
-                                            ]
-                                        )
-                                    ]
-                                  ]
-                              )
+                      Scrollbar(
+                        thumbVisibility: true,
+                        controller: _scrollController,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          controller: _scrollController,
+                          child: SizedBox(
+                            width:1000,
+                            child: PaginatedDataTable(
+                                columnSpacing:50,
+                                //  header: const Text("Report Details", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                rowsPerPage:15,
+                                columns:   const [
+                                  DataColumn(label: Center(child: Text("S.No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                  DataColumn(label: Center(child: Text("Name ",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                  DataColumn(label: Center(child: Text("Mobile No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                  DataColumn(label: Center(child: Text("Company Name",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                  DataColumn(label: Center(child: Text("Status",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                ],
+                                source: MyDataTableSourceA(
+                                  data: filteredData,
+                                  context: context,
+                                )
+                            ),
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -879,7 +1002,50 @@ class _ApprovedMemebersState extends State<ApprovedMemebers> {
       ),
     );
   }
+  List<Map<String, dynamic>> filterData(String searchTerm) {
+    if (searchTerm.isEmpty) {
+      return data;
+    } else {
+      return data.where((item) => item["first_name"].toLowerCase().contains(searchTerm.toLowerCase())).toList();
+    }
+  }
 }
+class MyDataTableSourceA extends DataTableSource {
+  List<Map<String, dynamic>> data;
+  BuildContext context;
+
+  MyDataTableSourceA({required this.data, required this.context,});
+
+  @override
+  int get rowCount => data.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+
+  @override
+  DataRow getRow(int index) {
+    return DataRow(
+      cells: [
+        DataCell(Text('${index + 1}')),
+        DataCell(Text('${data[index]["first_name"]}')),
+        DataCell(Text('${data[index]["mobile"]}')),
+        DataCell(Text('${data[index]["company_name"]}')),
+        DataCell(Text("${data[index]["admin_rights"]}",style: TextStyle(color: Colors.green),),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void rowsRefresh() {
+    // handle data refresh
+  }
+}
+
+
 class RejectMembers extends StatefulWidget {
   const RejectMembers({Key? key}) : super(key: key);
 
@@ -902,27 +1068,35 @@ class _RejectMembersState extends State<RejectMembers> {
   String firstname = "";
   String? currentRow;
   String? today;
+  final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> data=[];
+  List<Map<String, dynamic>> filteredData = [];
   String rejected = "Rejected";
+
   Future<void> getData() async {
     print('Attempting to make HTTP request...');
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/new_member_approval.php?admin_rights=$rejected');
-      print(url);
       final response = await http.get(url);
+      print("ResponseStatus: ${response.statusCode}");
+      print("Response: ${response.body}");
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         print("ResponseData: $responseData");
         final List<dynamic> itemGroups = responseData;
-        setState(() {});
-        data = itemGroups.cast<Map<String, dynamic>>();
+        setState(() {
+          data = itemGroups.cast<Map<String, dynamic>>();
+          filteredData = data; // Initially set filtered data to all data
+        });
+        print('Data: $data');
+        print("Id: ${data[0]["id"]}");
       } else {
         print('Error: ${response.statusCode}');
       }
       print('HTTP request completed. Status code: ${response.statusCode}');
     } catch (e) {
       print('Error making HTTP request: $e');
-      throw e; // rethrow the error if needed
+      throw e;
     }
   }
 
@@ -980,11 +1154,13 @@ class _RejectMembersState extends State<RejectMembers> {
                       const SizedBox(height: 15,),*/
 //Search TextFormField starts
                       Align(alignment: Alignment.topRight,
-                        child: SizedBox(width: 380,
+                        child: SizedBox(
+                          width: 300,
+                          height: 50,
                           child: TextFormField(
                             onChanged: (val){         //search bar
                               setState(() {
-                                name = val ;
+                                filteredData = filterData(val);
                               });
                             },
                             decoration:  const InputDecoration(
@@ -1000,7 +1176,35 @@ class _RejectMembersState extends State<RejectMembers> {
 //Search TextFormField end
                       const SizedBox(height: 20,),
                       //Table
-                      Align(
+                      const SizedBox(height: 20,),
+                      Scrollbar(
+                        thumbVisibility: true,
+                        controller: _scrollController,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          controller: _scrollController,
+                          child: SizedBox(
+                            width:1000,
+                            child: PaginatedDataTable(
+                                columnSpacing:50,
+                                //  header: const Text("Report Details", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                rowsPerPage:15,
+                                columns:   const [
+                                  DataColumn(label: Center(child: Text("S.No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                  DataColumn(label: Center(child: Text("Name ",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                  DataColumn(label: Center(child: Text("Mobile No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                  DataColumn(label: Center(child: Text("Company Name",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                  DataColumn(label: Center(child: Text("Status",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                ],
+                                source: MyDataTableSourceReject(
+                                  data: filteredData,
+                                  context: context,
+                                )
+                            ),
+                          ),
+                        ),
+                      ),
+                      /*Align(
                         alignment: Alignment.center,
                         child: Container(
                           child: SingleChildScrollView(
@@ -1101,7 +1305,7 @@ class _RejectMembersState extends State<RejectMembers> {
                               )
                           ),
                         ),
-                      )
+                      )*/
                     ],
                   ),
                 ),
@@ -1113,9 +1317,47 @@ class _RejectMembersState extends State<RejectMembers> {
       ),
     );
   }
+  List<Map<String, dynamic>> filterData(String searchTerm) {
+    if (searchTerm.isEmpty) {
+      return data;
+    } else {
+      return data.where((item) => item["first_name"].toLowerCase().contains(searchTerm.toLowerCase())).toList();
+    }
+  }
 }
+class MyDataTableSourceReject extends DataTableSource {
+  List<Map<String, dynamic>> data;
+  BuildContext context;
 
+  MyDataTableSourceReject({required this.data, required this.context,});
 
+  @override
+  int get rowCount => data.length;
 
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+
+  @override
+  DataRow getRow(int index) {
+    return DataRow(
+      cells: [
+        DataCell(Text('${index + 1}')),
+        DataCell(Text('${data[index]["first_name"]}')),
+        DataCell(Text('${data[index]["mobile"]}')),
+        DataCell(Text('${data[index]["company_name"]}')),
+        DataCell(Text("${data[index]["admin_rights"]}",style: TextStyle(color: Colors.red),),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void rowsRefresh() {
+    // handle data refresh
+  }
+}
 
 

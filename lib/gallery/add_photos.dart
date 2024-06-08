@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:gibadmin/gallery/view_photos_gallery.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart'as http;
 import '../main.dart';
@@ -62,7 +63,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                     Tab(
                       icon: Row(
                         children: [
-                          Text("Images",),
+                          Text("Add Images",),
                           SizedBox(width: 10,),
 
                           Icon(
@@ -75,7 +76,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                     Tab(
                       icon: Row(
                         children: [
-                          Text("Videos",),
+                          Text("View Images",),
                           SizedBox(width: 10,),
                           Icon(
                             Icons.video_camera_back,
@@ -94,7 +95,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                 child: Expanded(
                   child: TabBarView(children: [
                     ImageAdd(),
-                    VideoAdd(),
+                    ViewPhotosPage(),
 
 
 
@@ -124,6 +125,8 @@ class _ImageAddState extends State<ImageAdd> {
   final _formKey = GlobalKey<FormState>();
   final eventNameController = TextEditingController();
   final dateController = TextEditingController();
+  bool isLoading = false;
+
 
   List<XFile> selectedImages = [];
   final picker = ImagePicker();
@@ -145,31 +148,41 @@ class _ImageAddState extends State<ImageAdd> {
   }
 
   Future<void> _uploadImages() async {
+    setState(() {
+      isLoading = true;
+    });
+
     if (_formKey.currentState!.validate() && selectedImages.isNotEmpty) {
       for (var image in selectedImages) {
         try {
           final bytes = await image.readAsBytes();
           final base64Image = base64Encode(bytes);
           final fileName = image.name;
-          print ('base64Image : $base64Image');
-          print('fileName : $fileName');
-          print('eventName : ${eventNameController.text}');
-          print('selectedDate : $selectedDate');
-
-
+          final url= Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibimage.php');
           final response = await http.post(
-            Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibimage.php'),
+            (url),
             body: {
               'event_name': eventNameController.text,
               'image_name': fileName,
               'image_data': base64Image,
               'selected_date': dateController.text,
-
             },
           );
 
           if (response.statusCode == 200) {
-            print('Image uploaded successfully.');
+
+            Navigator.pushNamed(context, '/add_photos');
+            showDialog(context: context, builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Success!'),
+                content: Text('Your Image(s) have been uploaded successfully.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context), // Close dialog
+                    child: Text('OK'),
+                  ),
+                ],
+              );});
           } else {
             print('Failed to upload image. Status code: ${response.statusCode}');
           }
@@ -185,7 +198,7 @@ class _ImageAddState extends State<ImageAdd> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(),
     );
     if (pickedDate != null && pickedDate != selectedDate) {
       setState(() {
@@ -225,7 +238,7 @@ class _ImageAddState extends State<ImageAdd> {
                       _selectDate(context);
                     },
                     decoration: InputDecoration(
-                      labelText: 'Select Date',
+                      hintText: 'Select Date',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
@@ -234,6 +247,12 @@ class _ImageAddState extends State<ImageAdd> {
                       }
                       return null;
                     },
+                      onChanged: (value) {
+                        setState(() {
+                          // This will re-validate the form and hide the error message
+                          _formKey.currentState?.validate();
+                        });}
+
                   ),
 
                 )),
@@ -242,17 +261,21 @@ class _ImageAddState extends State<ImageAdd> {
                   child: TextFormField(
                     controller: eventNameController,
                     decoration: InputDecoration(
-                      labelText: 'Event Name',
+                     // labelText: 'Event Name',
                       hintText: 'Enter your event name',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter some text';
+                        return 'Please enter Event Name';
                       }
                       return null;
                     },
                     onChanged: (value) {
+                      setState(() {
+                        // This will re-validate the form and hide the error message
+                        _formKey.currentState?.validate();
+                      });
                       String capitalizedValue = capitalizeFirstLetter(value);
                       eventNameController.value = eventNameController.value.copyWith(
                         text: capitalizedValue,
@@ -352,7 +375,9 @@ class _VideoAddState extends State<VideoAdd> {
 
   Future<void> _pickVideo() async {
 
-    final XFile? pickedVideo = await picker.pickVideo(source: ImageSource.gallery, maxDuration: Duration(seconds: 120),);
+    final XFile? pickedVideo = await picker.pickVideo(source: ImageSource.gallery, maxDuration: Duration(seconds: 120),
+
+    );
     if (pickedVideo != null) {
       final Uint8List videoBytes = await pickedVideo.readAsBytes();
       if (videoBytes.length > 10 * 1024 * 1024) {
@@ -384,14 +409,15 @@ class _VideoAddState extends State<VideoAdd> {
   }
 
   Future<void> _uploadVideos() async {
+    setState(() {
+      isLoading = true;
+    });
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     String eventName = eventNameController.text;
     String selectedDate = dateController.text;
-    print('eventName: $eventName');
-    print('selectedDate: $selectedDate');
     for (XFile video in selectedVideos) {
       Uint8List videoBytes = await video.readAsBytes();
 
@@ -416,7 +442,24 @@ class _VideoAddState extends State<VideoAdd> {
 
       if (response.statusCode == 200) {
         var responseData = await response.stream.bytesToString();
-        print('Upload success: $responseData');
+        Navigator.pushNamed(context, '/add_photos');
+        showDialog(context: context, builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Success!'),
+                content: Text('Your video(s) have been uploaded successfully.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context), // Close dialog
+                    child: Text('OK'),
+                  ),
+                ],
+              );});
+        setState(() {
+          isLoading = false;
+        });
+
+
+
       } else {
         print('Upload failed: ${response.reasonPhrase}');
       }
@@ -428,7 +471,7 @@ class _VideoAddState extends State<VideoAdd> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(),
     );
     if (pickedDate != null && pickedDate != selectedDate) {
       setState(() {
@@ -444,6 +487,8 @@ class _VideoAddState extends State<VideoAdd> {
     }
     return '';
   }
+
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -468,10 +513,16 @@ class _VideoAddState extends State<VideoAdd> {
                       _selectDate(context);
                     },
                     decoration: InputDecoration(
-                      labelText: 'Select Date',
+                      hintText: 'Select Date',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
+                      onChanged: (value) {
+                        setState(() {
+                          // This will re-validate the form and hide the error message
+                          _formKey.currentState?.validate();
+                        });
+                        }    ,
+                      validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter Event date';
                       }
@@ -485,7 +536,6 @@ class _VideoAddState extends State<VideoAdd> {
                   child: TextFormField(
                     controller: eventNameController,
                     decoration: InputDecoration(
-                      labelText: 'Event Name',
                       hintText: 'Enter your event name',
                       border: OutlineInputBorder(),
                     ),
@@ -496,9 +546,14 @@ class _VideoAddState extends State<VideoAdd> {
                       return null;
                     },
                     onChanged: (value) {
+                      setState(() {
+                        // This will re-validate the form and hide the error message
+                        _formKey.currentState?.validate();
+                      });
                       String capitalizedValue = capitalizeFirstLetter(value);
                       eventNameController.value = eventNameController.value.copyWith(
                         text: capitalizedValue,
+
                       );
                     },
 
@@ -519,12 +574,12 @@ class _VideoAddState extends State<VideoAdd> {
                   child: const Text('Select Videos from Gallery'),
                   onPressed: _pickVideo,
                 ),
-                ElevatedButton(
+                isLoading ? CircularProgressIndicator() : ElevatedButton(
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(selectedVideos.isNotEmpty ? Colors.blue : Colors.grey), // Change color based on video selection
                   ),
                   onPressed: _uploadVideos,
-                  child: Text('       Submit      '),
+                  child: Center(child: Text('   Submit    ')),
                 ),
 
               ],

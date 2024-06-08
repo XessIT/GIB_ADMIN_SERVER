@@ -75,9 +75,8 @@ class _UpdateRegisterationPageState extends State<UpdateRegisterationPage> {
       userID = widget.currentID.toString();
       fetchData(widget.currentID.toString());
       getRole();
-      getMemberType();
     });
-
+    getMemberType();
     super.initState();
   }
 
@@ -303,7 +302,7 @@ class _UpdateRegisterationPageState extends State<UpdateRegisterationPage> {
   List<Map<String, dynamic>> suggesstiondataitemName = [];
   Future<void> getChapter(String district) async {
     try {
-      final url = Uri.parse('http://localhost/GIBAPI/chapter.php?district=$district'); // Fix URL
+      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/chapter.php?district=$district'); // Fix URL
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -414,7 +413,7 @@ class _UpdateRegisterationPageState extends State<UpdateRegisterationPage> {
   List<Map<String, dynamic>> memberSuggestion = [];
   Future<void> getMemberType() async {
     try {
-      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/member_type.php');
+      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/subscription.php?table="member_type"');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);

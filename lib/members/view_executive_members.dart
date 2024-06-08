@@ -33,6 +33,8 @@ var items = [
 
 class _ExecutiveMembersPageState extends State<ExecutiveMembersPage> {
   TextEditingController search = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  List<Map<String, dynamic>> filteredData = [];
   String name = "";
   // String companyname ="";
   String membertype = "Executive Men's Wing";
@@ -45,32 +47,31 @@ class _ExecutiveMembersPageState extends State<ExecutiveMembersPage> {
   }
 
   List<Map<String, dynamic>> data = [];
+
   Future<void> getData() async {
     print('Attempting to make HTTP request...');
     try {
-      final url = Uri.parse(
-          'http://mybudgetbook.in/GIBADMINAPI/womens_executive.php?member_type=$membertype');
-      print(url);
+      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/womens_executive.php?member_type=$membertype');
       final response = await http.get(url);
       print("ResponseStatus: ${response.statusCode}");
       print("Response: ${response.body}");
-      // http.Response response = await http.get(url);
-      //  var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         print("ResponseData: $responseData");
         final List<dynamic> itemGroups = responseData;
-        setState(() {});
-        data = itemGroups.cast<Map<String, dynamic>>();
+        setState(() {
+          data = itemGroups.cast<Map<String, dynamic>>();
+          filteredData = data; // Initially set filtered data to all data
+        });
         print('Data: $data');
-        print("Id: ${data[0]["ID"]}");
+        print("Id: ${data[0]["id"]}");
       } else {
         print('Error: ${response.statusCode}');
       }
       print('HTTP request completed. Status code: ${response.statusCode}');
     } catch (e) {
       print('Error making HTTP request: $e');
-      throw e; // rethrow the error if needed
+      throw e;
     }
   }
 
@@ -115,17 +116,18 @@ class _ExecutiveMembersPageState extends State<ExecutiveMembersPage> {
                       children: [
                         SizedBox(
                           width: 300,
+                          height: 50,
                           child: TextFormField(
-                            onChanged: (val) {
+                            onChanged: (val){         //search bar
                               setState(() {
-                                name = val;
-                                // companyname =val;
+                                filteredData = filterData(val);
                               });
                             },
-                            controller: search,
-                            decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.search),
-                              border: OutlineInputBorder(),
+                            decoration:  const InputDecoration(
+                              prefixIcon: Icon(Icons.search,color: Colors.green,),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(12))
+                              ),
                               hintText: 'Search ',
                             ),
                           ),
@@ -135,185 +137,35 @@ class _ExecutiveMembersPageState extends State<ExecutiveMembersPage> {
                     const SizedBox(
                       height: 40,
                     ),
-                    Container(
-                      height: 300,
+                    Scrollbar(
+                      thumbVisibility: true,
+                      controller: _scrollController,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Table(
-                          border: TableBorder.all(),
-                          defaultColumnWidth: const FixedColumnWidth(190.0),
-                          columnWidths: const <int, TableColumnWidth>{
-                            0: FixedColumnWidth(70),
-                            2: FixedColumnWidth(100),
-                            5: FixedColumnWidth(70)
-                          },
-                          //  5:FixedColumnWidth(140),},
-                          defaultVerticalAlignment:
-                              TableCellVerticalAlignment.middle,
-                          children: [
-                            TableRow(children: [
-                              //s.no
-                              TableCell(
-                                  child: Center(
-                                child: Column(
-                                  children: [
-                                    const SizedBox(
-                                      height: 8,
-                                    ),
-                                    Text('S.No',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall),
-                                    const SizedBox(
-                                      height: 8,
-                                    ),
-                                  ],
-                                ),
-                              )),
-                              //name
-                              TableCell(
-                                child: Center(
-                                  child: Text('Name',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall),
-                                ),
-                              ),
-                              // user id
-                              TableCell(
-                                child: Center(
-                                  child: Text('User Id',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall),
-                                ),
-                              ),
-                              // email
-                              TableCell(
-                                child: Center(
-                                  child: Text('Email',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall),
-                                ),
-                              ),
-                              // mobile
-                              TableCell(
-                                child: Center(
-                                  child: Text('Mobile',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall),
-                                ),
-                              ),
-                              // Edit
-                              TableCell(
-                                child: Center(
-                                  child: Text('Edit',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall),
-                                ),
-                              ),
-                            ]),
-                            for (var i = 0; i < data.length; i++) ...[
-                              if (data[i]["first_name"]
-                                  .toString()
-                                  .toLowerCase()
-                                  .startsWith(name.toLowerCase()))
-
-                                //   if( storedocs[i]["Company Name"].toString().toLowerCase().startsWith(name.toLowerCase()))
-
-                                TableRow(
-                                    decoration:
-                                        BoxDecoration(color: Colors.grey[200]),
-                                    children: [
-                                      //s.no
-                                      TableCell(
-                                        child: Center(
-                                            child: Text(
-                                          '${i + 1}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall,
-                                        )),
-                                      ),
-                                      // name
-                                      TableCell(
-                                        child: Center(
-                                            child: Text(
-                                          '${data[i]["first_name"]}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall,
-                                        )),
-                                      ),
-                                      //User id
-                                      TableCell(
-                                        child: Center(
-                                            child: Text(
-                                          '${data[i]["member_id"]}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall,
-                                        )),
-                                      ),
-                                      // email
-                                      TableCell(
-                                        child: Center(
-                                          child: Text(
-                                            '${data[i]["email"]}',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
-                                          ),
-                                        ),
-                                      ),
-                                      //mobile
-                                      TableCell(
-                                        child: Center(
-                                          child: Text(
-                                            '${data[i]["mobile"]}',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
-                                          ),
-                                        ),
-                                      ),
-                                      TableCell(
-                                          child: Center(
-                                        child: Column(
-                                          children: [
-                                            const SizedBox(
-                                              height: 8,
-                                            ),
-                                            IconButton(
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              UpdateRegisterationPage(
-                                                                  currentID: data[
-                                                                          i]
-                                                                      ["id"])));
-                                                },
-                                                icon: const Icon(
-                                                  Icons.edit_note,
-                                                  color: Colors.blue,
-                                                )),
-                                            const SizedBox(
-                                              height: 8,
-                                            ),
-                                          ],
-                                        ),
-                                      )),
-                                    ]),
-                            ]
-                          ],
+                        controller: _scrollController,
+                        child: SizedBox(
+                          width:1000,
+                          child: PaginatedDataTable(
+                              columnSpacing:50,
+                              //  header: const Text("Report Details", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              rowsPerPage:15,
+                              columns:   const [
+                                DataColumn(label: Center(child: Text("S.No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                DataColumn(label: Center(child: Text("Name ",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                DataColumn(label: Center(child: Text("Member ID ",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                DataColumn(label: Center(child: Text("Mobile No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                DataColumn(label: Center(child: Text("Company Name",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                DataColumn(label: Center(child: Text("Status",style: TextStyle(fontWeight: FontWeight.bold),))),
+                              ],
+                              source: MyDataTableSource(
+                                data: filteredData,
+                                context: context,
+                              )
+                          ),
                         ),
                       ),
-                    )
+                    ),
+
                   ]),
                 ),
               ),
@@ -322,5 +174,62 @@ class _ExecutiveMembersPageState extends State<ExecutiveMembersPage> {
         ),
       ),
     );
+  }
+  List<Map<String, dynamic>> filterData(String searchTerm) {
+    if (searchTerm.isEmpty) {
+      return data;
+    } else {
+      return data.where((item) => item["first_name"].toLowerCase().contains(searchTerm.toLowerCase())).toList();
+    }
+  }
+}
+class MyDataTableSource extends DataTableSource {
+  List<Map<String, dynamic>> data;
+  BuildContext context;
+
+  MyDataTableSource({required this.data, required this.context,});
+
+  @override
+  int get rowCount => data.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+
+  @override
+  DataRow getRow(int index) {
+    return DataRow(
+      cells: [
+        DataCell(Text('${index + 1}')),
+        DataCell(Text('${data[index]["first_name"]} ${data[index]["last_name"]}')),
+        DataCell(Text('${data[index]["member_id"]}')),
+        DataCell(Text('${data[index]["mobile"]}')),
+        DataCell(Text('${data[index]["company_name"]}')),
+        DataCell(
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            UpdateRegisterationPage(
+                                currentID: data[
+                                index]
+                                ["id"])));
+              },
+              icon: const Icon(
+                Icons.edit_note,
+                color: Colors.blue,
+              )),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void rowsRefresh() {
+    // handle data refresh
   }
 }
