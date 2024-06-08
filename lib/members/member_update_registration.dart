@@ -96,7 +96,7 @@ class _UpdateRegisterationPageState extends State<UpdateRegisterationPage> {
 
   Future<void> fetchData(String userId) async {
     try {
-      final url = Uri.parse('http://localhost/GIB/lib/GIBAPI/registration.php?table=registration&id=$userId');
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/registration.php?table=registration&id=$userId');
       final response = await http.get(url);
       print("fetch url: $url");
 
@@ -142,7 +142,7 @@ class _UpdateRegisterationPageState extends State<UpdateRegisterationPage> {
 
                 String profileImage = data["profile_image"] ?? '';
                 if (profileImage.isNotEmpty) {
-                  imageUrl = 'http://localhost/GIB/lib/GIBAPI/$profileImage';
+                  imageUrl = 'http://mybudgetbook.in/GIBAPI/$profileImage';
                 } else {
                   imageUrl = 'default_image_url'; // Set to a default image URL or handle accordingly
                 }
@@ -183,7 +183,7 @@ class _UpdateRegisterationPageState extends State<UpdateRegisterationPage> {
     });
 
     try {
-      final url = Uri.parse('http://localhost/GIB/lib/GIBAPI/update_profile.php');
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/update_profile.php');
       print("edit url:$url");
       final response = await http.post(
         url,

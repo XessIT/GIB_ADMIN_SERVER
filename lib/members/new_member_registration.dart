@@ -34,7 +34,7 @@ class _MemberRegistrationState extends State<MemberRegistration> {
     try {
       print("Mobile :$mobile");
 
-      final url = Uri.parse('http://localhost/GIB/lib/GIBAPI/registration.php?table=registration&mobile=$mobile');
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/registration.php?table=registration&mobile=$mobile');
       final response = await http.get(url);
       print("id fetch URL :$url" );
       if (response.statusCode == 200) {
@@ -143,8 +143,6 @@ class _MemberRegistrationState extends State<MemberRegistration> {
                         },
                           onChanged: (value){
                          mobileBaseIdFetched(mobilecontroller.text);
-
-
                           },
                         decoration: const InputDecoration(
                           label: Text("Mobile Number"),

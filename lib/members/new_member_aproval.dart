@@ -820,7 +820,7 @@ class _ApprovedMemebersState extends State<ApprovedMemebers> {
                                         ]),
                                     // Table row end
                                     for(var i = 0 ;i < data.length; i++)...[
-                                      if(data[i]['First Name']
+                                      if(data[i]['first_name']
                                           .toString()
                                           .toLowerCase().startsWith(name.toLowerCase()))
                                       //Table row start
