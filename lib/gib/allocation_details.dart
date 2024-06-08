@@ -66,7 +66,7 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
   List district = [];
   Future<void> getDistrict() async {
     try {
-      final url = Uri.parse('http://localhost/GIB/lib/GIBAPI/district.php');
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/district.php');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -87,8 +87,7 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
   List<Map<String, dynamic>> suggesstiondataitemName = [];
   Future<void> getChapter(String district) async {
     try {
-      final url = Uri.parse(
-          'http://localhost/GIB/lib/GIBAPI/chapter.php?district=$district'); // Fix URL
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/chapter.php?district=$district'); // Fix URL
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -99,7 +98,8 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
         print('Sorted chapter Names: $suggesstiondataitemName');
         setState(() {
           print('chapter: $chapters');
-          setState(() {});
+          setState(() {
+          });
           chapterController.clear();
         });
       } else {
