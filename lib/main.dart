@@ -186,8 +186,68 @@ class MyApp extends StatelessWidget {
               title: 'GIB Admin',
               home: AdminLogin(),
               theme: ThemeData(
-                  // Your theme and other configurations
+                /// app bar 18
+                /// inside body heding  16
+                /// inside text 14
+                /// body for black
+                /// label for white
+                /// headline for medium  green
+
+                textTheme: GoogleFonts.aBeeZeeTextTheme().copyWith(
+                  headlineSmall: const TextStyle(
+                      fontSize: 16.0, color: Colors.green),
+                  headlineMedium: const TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold),
+                  headlineLarge:
+                  const TextStyle(fontSize: 16.0, color: Colors.blue),
+
+                  bodySmall:
+                  const TextStyle(fontSize: 14, color: Colors.black),
+                  bodyMedium: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),
+                  bodyLarge: const TextStyle(
+                      fontSize: 18.0, color: Colors.black),
+
+                  displayLarge:
+                  const TextStyle(fontSize: 18, color: Colors.white),
+                  displayMedium: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                  displaySmall: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white), // Assuming this is for labels
+                ),
+                outlinedButtonTheme: OutlinedButtonThemeData(
+                    style: OutlinedButton.styleFrom(
+                        elevation: 4,
+                        shadowColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.orange,
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)  ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 50),
+                        textStyle: const TextStyle(fontSize: 15))),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                    style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.green.shade800,
+                        elevation: 4,
+                        shadowColor: Colors.pink,
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)  ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 50),
+                        textStyle: const TextStyle(fontSize: 15))),
+                inputDecorationTheme: InputDecorationTheme(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
                   ),
+                ),
+              ),
               onGenerateRoute: (settings) {
                 final page = _getPageWidget(settings);
                 if (page != null) {
@@ -488,19 +548,18 @@ class _MyScaffoldState extends State<MyScaffold> {
         ]),
     //Gallery
     const AdminMenuItem(title: 'Gallery', icon: Icons.photo_album, children: [
-      AdminMenuItem(title: 'Add Photos', route: '/add_photos'),
-      AdminMenuItem(title: 'View Photos', route: "/view_images_gallery"),
+      AdminMenuItem(title: ' GIB Images', route: '/add_photos'),
+     // AdminMenuItem(title: 'View Photos', route: "/view_images_gallery"),
     ]),
     //GIB Achievements
     const AdminMenuItem(
         title: 'GIB Achievements',
         icon: Icons.photo_album,
         children: [
-          AdminMenuItem(title: 'Add Photos', route: 'gib_achieve_add_photos'),
-          AdminMenuItem(
-              title: 'View Photos',
-              route: "/gib_achievements_view_images_gallery"),
-        ]),
+          AdminMenuItem(title: 'GIB Achievements Images', route: 'gib_achieve_add_photos'),
+         // AdminMenuItem(title: 'View Photos', route: "/gib_achievements_view_images_gallery"),
+        ]
+    ),
     //Ad's
     const AdminMenuItem(title: "Ad's", icon: Icons.leak_add, children: [
       AdminMenuItem(title: "Add-Ad's", route: '/add_ads'),
