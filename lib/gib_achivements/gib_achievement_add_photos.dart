@@ -11,6 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:intl/intl.dart';
 
+import 'gib_achivements_view_photos.dart';
+
 
 
 
@@ -62,7 +64,7 @@ class _AchievementPhotosPageState extends State<AchievementPhotosPage> {
                     Tab(
                       icon: Row(
                         children: [
-                          Text("Images",),
+                          Text("Add Images",),
                           SizedBox(width: 10,),
 
                           Icon(
@@ -75,7 +77,7 @@ class _AchievementPhotosPageState extends State<AchievementPhotosPage> {
                     Tab(
                       icon: Row(
                         children: [
-                          Text("Videos",),
+                          Text("View Images",),
                           SizedBox(width: 10,),
                           Icon(
                             Icons.video_camera_back,
@@ -94,7 +96,7 @@ class _AchievementPhotosPageState extends State<AchievementPhotosPage> {
                 child: Expanded(
                     child: TabBarView(children: [
                       AchievementImageAdd(),
-                      AchievementVideoAdd(),
+                      AchievementViewPhotosPage(),
 
 
 
