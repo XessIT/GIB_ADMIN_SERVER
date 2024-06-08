@@ -7,24 +7,25 @@
  include 'connection.php';  // Ensure you include your database connection
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $member_type = isset($_GET['member_type']) ? mysqli_real_escape_string($conn, $_GET['member_type']) : "";
-                 // Fetch data from the registration table
-                        $registrationlist = "SELECT * FROM registration where member_type='$member_type'";
-                        $registrationResult = mysqli_query($conn, $registrationlist);
-                        if ($registrationResult && mysqli_num_rows($registrationResult) > 0) {
-                            $registrations = array();
-                            while ($row = mysqli_fetch_assoc($registrationResult)) {
-                                $registrations[] = $row;
-                            }
-                            echo json_encode($registrations);
-                        } else {
-                            echo json_encode(array("message" => "No registrations found"));
-                        }
-              /* else {
-                       echo json_encode(array("message" => "Invalid table name"));
-                       exit;
-                   } */
+  $member_type = isset($_GET['member_type']) ? mysqli_real_escape_string($conn, $_GET['member_type']) : "";
+  $admin_rights = isset($_GET['admin_rights']) ? mysqli_real_escape_string($conn, $_GET['admin_rights']) : "";
+  $block_status = isset($_GET['block_status']) ? mysqli_real_escape_string($conn, $_GET['block_status']) : "";
+
+  // Corrected filtering conditions
+  $registrationlist = "SELECT * FROM registration WHERE member_type='$member_type' AND admin_rights = 'Accepted' AND block_status = 'UnBlock'";
+  $registrationResult = mysqli_query($conn, $registrationlist);
+
+  if ($registrationResult && mysqli_num_rows($registrationResult) > 0) {
+    $registrations = array();
+    while ($row = mysqli_fetch_assoc($registrationResult)) {
+      $registrations[] = $row;
+    }
+    echo json_encode($registrations);
+  } else {
+    echo json_encode(array("message" => "No registrations found with the specified criteria"));
+  }
 }
+
 
 else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle the insert/update/delete actions

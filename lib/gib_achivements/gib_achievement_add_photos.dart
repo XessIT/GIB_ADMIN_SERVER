@@ -11,6 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:intl/intl.dart';
 
+import 'gib_achivements_view_photos.dart';
+
 
 
 
@@ -62,7 +64,7 @@ class _AchievementPhotosPageState extends State<AchievementPhotosPage> {
                     Tab(
                       icon: Row(
                         children: [
-                          Text("Images",),
+                          Text("Add Images",),
                           SizedBox(width: 10,),
 
                           Icon(
@@ -75,7 +77,7 @@ class _AchievementPhotosPageState extends State<AchievementPhotosPage> {
                     Tab(
                       icon: Row(
                         children: [
-                          Text("Videos",),
+                          Text("View Images",),
                           SizedBox(width: 10,),
                           Icon(
                             Icons.video_camera_back,
@@ -94,7 +96,7 @@ class _AchievementPhotosPageState extends State<AchievementPhotosPage> {
                 child: Expanded(
                     child: TabBarView(children: [
                       AchievementImageAdd(),
-                      AchievementVideoAdd(),
+                      AchievementViewPhotosPage(),
 
 
 
@@ -128,6 +130,8 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
   List<XFile> selectedImages = [];
   final picker = ImagePicker();
   DateTime? selectedDate;
+  bool isLoading = false;
+
   ///capital letter starts code
   String capitalizeFirstLetter(String text) {
     if (text.isEmpty) return text;
@@ -151,14 +155,7 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
           final bytes = await image.readAsBytes();
           final base64Image = base64Encode(bytes);
           final fileName = image.name;
-          print ('base64Image : $base64Image');
-          print('fileName : $fileName');
-          print('eventName : ${eventNameController.text}');
-          print('selectedDate : $selectedDate');
-          print('9344155476');
           final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/gibachievementimage.php');
-          print('url : $url');
-
           final response = await http.post(url,
             body: {
               'event_name': eventNameController.text,
@@ -170,7 +167,23 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
           );
 
           if (response.statusCode == 200) {
-            print('Image uploaded successfully.');
+            Navigator.pushNamed(context, '/gib_achieve_add_photos');
+
+            showDialog(context: context, builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Success!'),
+                content: Text('Your Image(s) have been uploaded successfully.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context), // Close dialog
+                    child: Text('OK'),
+                  ),
+                ],
+              );});
+            setState(() {
+              isLoading = false;
+            });
+
           } else {
             print('Failed to upload image. Status code: ${response.statusCode}');
           }
@@ -186,7 +199,7 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate:  DateTime.now(),
     );
     if (pickedDate != null && pickedDate != selectedDate) {
       setState(() {
@@ -235,6 +248,11 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
                       }
                       return null;
                     },
+                      onChanged: (value) {
+                        setState(() {
+                          // This will re-validate the form and hide the error message
+                          _formKey.currentState?.validate();
+                        });}
                   ),
 
                 )),
@@ -249,11 +267,15 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter some text';
+                        return 'Please Enter a Event Name';
                       }
                       return null;
                     },
                     onChanged: (value) {
+                      setState(() {
+                        // This will re-validate the form and hide the error message
+                        _formKey.currentState?.validate();
+                      });
                       String capitalizedValue = capitalizeFirstLetter(value);
                       eventNameController.value = eventNameController.value.copyWith(
                         text: capitalizedValue,
@@ -276,7 +298,7 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
                   child: const Text('Select Images from Gallery'),
                   onPressed: _pickImages,
                 ),
-                ElevatedButton(
+                isLoading ? CircularProgressIndicator() :ElevatedButton(
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(selectedImages.isNotEmpty ? Colors.blue : Colors.grey), // Change color based on images selection
                   ),
@@ -348,6 +370,8 @@ class _AchievementVideoAddState extends State<AchievementVideoAdd> {
     if (text.isEmpty) return text;
     return text.substring(0, 1).toUpperCase() + text.substring(1);
   }
+  bool isLoading = false;
+
 
 
 
@@ -385,6 +409,9 @@ class _AchievementVideoAddState extends State<AchievementVideoAdd> {
   }
 
   Future<void> _uploadVideos() async {
+    setState(() {
+      isLoading = true;
+    });
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -417,7 +444,21 @@ class _AchievementVideoAddState extends State<AchievementVideoAdd> {
 
       if (response.statusCode == 200) {
         var responseData = await response.stream.bytesToString();
-        print('Upload success: $responseData');
+        Navigator.pushNamed(context, '/gib_achieve_add_photos');
+        showDialog(context: context, builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Success!'),
+            content: Text('Your video(s) have been uploaded successfully.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context), // Close dialog
+                child: Text('OK'),
+              ),
+            ],
+          );});
+        setState(() {
+          isLoading = false;
+        });
       } else {
         print('Upload failed: ${response.reasonPhrase}');
       }
@@ -429,7 +470,7 @@ class _AchievementVideoAddState extends State<AchievementVideoAdd> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(),
     );
     if (pickedDate != null && pickedDate != selectedDate) {
       setState(() {
@@ -478,6 +519,11 @@ class _AchievementVideoAddState extends State<AchievementVideoAdd> {
                       }
                       return null;
                     },
+                      onChanged: (value) {
+                        setState(() {
+                          // This will re-validate the form and hide the error message
+                          _formKey.currentState?.validate();
+                        });}
                   ),
 
                 )),
@@ -497,6 +543,10 @@ class _AchievementVideoAddState extends State<AchievementVideoAdd> {
                       return null;
                     },
                     onChanged: (value) {
+                      setState(() {
+                        // This will re-validate the form and hide the error message
+                        _formKey.currentState?.validate();
+                      });
                       String capitalizedValue = capitalizeFirstLetter(value);
                       eventNameController.value = eventNameController.value.copyWith(
                         text: capitalizedValue,
@@ -520,7 +570,7 @@ class _AchievementVideoAddState extends State<AchievementVideoAdd> {
                   child: const Text('Select Videos from Gallery'),
                   onPressed: _pickVideo,
                 ),
-                ElevatedButton(
+                isLoading ? CircularProgressIndicator() : ElevatedButton(
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(selectedVideos.isNotEmpty ? Colors.blue : Colors.grey), // Change color based on video selection
                   ),

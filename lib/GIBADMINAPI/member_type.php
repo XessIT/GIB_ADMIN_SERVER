@@ -12,7 +12,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT DISTINCT member_type FROM member_type ORDER BY member_type";
+$sql = "SELECT DISTINCT member_type FROM member_type";
 $result = array();
 $res = $con->query($sql);
 

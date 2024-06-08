@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:gibadmin/gallery/view_photos_gallery.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart'as http;
 import '../main.dart';
@@ -62,7 +63,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                     Tab(
                       icon: Row(
                         children: [
-                          Text("Images",),
+                          Text("Add Images",),
                           SizedBox(width: 10,),
 
                           Icon(
@@ -75,7 +76,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                     Tab(
                       icon: Row(
                         children: [
-                          Text("Videos",),
+                          Text("View Images",),
                           SizedBox(width: 10,),
                           Icon(
                             Icons.video_camera_back,
@@ -94,7 +95,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                 child: Expanded(
                   child: TabBarView(children: [
                     ImageAdd(),
-                    VideoAdd(),
+                    ViewPhotosPage(),
 
 
 
@@ -124,6 +125,8 @@ class _ImageAddState extends State<ImageAdd> {
   final _formKey = GlobalKey<FormState>();
   final eventNameController = TextEditingController();
   final dateController = TextEditingController();
+  bool isLoading = false;
+
 
   List<XFile> selectedImages = [];
   final picker = ImagePicker();
@@ -145,6 +148,10 @@ class _ImageAddState extends State<ImageAdd> {
   }
 
   Future<void> _uploadImages() async {
+    setState(() {
+      isLoading = true;
+    });
+
     if (_formKey.currentState!.validate() && selectedImages.isNotEmpty) {
       for (var image in selectedImages) {
         try {
