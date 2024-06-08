@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-//import 'package:table_paginator/table_paginator.dart';
 import '../../main.dart';
 import 'member_update_registration.dart';
+
 
 class WomensExecutiveMembers extends StatelessWidget {
   const WomensExecutiveMembers({Key? key}) : super(key: key);
@@ -12,7 +12,6 @@ class WomensExecutiveMembers extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: WomensExecutiveMembersPage(),
-
     );
   }
 }
@@ -29,6 +28,8 @@ class _WomensExecutiveMembersPageState extends State<WomensExecutiveMembersPage>
   var numbersgrouplist = ["10",'25','50',
     '100',];
   TextEditingController search =TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  List<Map<String, dynamic>> filteredData = [];
   //final DataTableSource _data = MyData();
   int activePage = 0;
   int pageSize = 10;
@@ -48,30 +49,28 @@ class _WomensExecutiveMembersPageState extends State<WomensExecutiveMembersPage>
     print('Attempting to make HTTP request...');
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/womens_executive.php?member_type=$membertype');
-      print(url);
       final response = await http.get(url);
       print("ResponseStatus: ${response.statusCode}");
       print("Response: ${response.body}");
-      // http.Response response = await http.get(url);
-      //  var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         print("ResponseData: $responseData");
         final List<dynamic> itemGroups = responseData;
-        setState(() {});
-        data = itemGroups.cast<Map<String, dynamic>>();
+        setState(() {
+          data = itemGroups.cast<Map<String, dynamic>>();
+          filteredData = data; // Initially set filtered data to all data
+        });
         print('Data: $data');
-        print("Id: ${data[0]["ID"]}");
+        print("Id: ${data[0]["id"]}");
       } else {
         print('Error: ${response.statusCode}');
       }
       print('HTTP request completed. Status code: ${response.statusCode}');
     } catch (e) {
       print('Error making HTTP request: $e');
-      throw e; // rethrow the error if needed
+      throw e;
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return MyScaffold(route: "/womens_executive_members",
@@ -100,183 +99,60 @@ class _WomensExecutiveMembersPageState extends State<WomensExecutiveMembersPage>
                             ],
                           ),
                           const SizedBox(height: 30,),
-                          //View Women's Executive Members text and icon end
-
-
-                          Wrap(
-                            runSpacing: 20,spacing: 20,
-                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              //search
-                              SizedBox(width: 300,
+                              SizedBox(
+                                width: 300,
+                                height: 50,
                                 child: TextFormField(
-                                  onChanged: (val){
+                                  onChanged: (val){         //search bar
                                     setState(() {
-                                      name = val;
+                                      filteredData = filterData(val);
                                     });
                                   },
-                                  controller: search,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.search),
-                                    border: OutlineInputBorder(),
+                                  decoration:  const InputDecoration(
+                                    prefixIcon: Icon(Icons.search,color: Colors.green,),
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(Radius.circular(12))
+                                    ),
                                     hintText: 'Search ',
                                   ),
-
                                 ),
                               ),
-                              const SizedBox(width: 20,height: 5,),
-                              ElevatedButton(
-                                  style: ElevatedButton.styleFrom(),
-                                  onPressed: (){
-                                    if(_formKey.currentState!.validate()){}
-                                    Navigator.pop(context);},
-                                  child:const Text("Go Back",
-                                    style: TextStyle(fontSize: 10),)),
-                              const SizedBox(width: 20,height: 5,),
-
                             ],
                           ),
-
-                          const SizedBox(height: 40,),
-                                 Container(
-                                  // height: 300,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Column(
-                                      children: [
-                                        Table(
-                                          border: TableBorder.all(),
-                                          defaultColumnWidth:const FixedColumnWidth(190.0),
-                                          columnWidths: const<int,TableColumnWidth>{
-                                            0:FixedColumnWidth(70),2:FixedColumnWidth(100), 5:FixedColumnWidth(70)},
-                                          //  5:FixedColumnWidth(140),},
-                                          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                          children: [
-                                            TableRow(
-                                                children: [
-                                                  //s.no
-                                                  TableCell(child:  Center(child: Column(children: [const SizedBox(height: 8,), Text('S.No', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8,),],),)),
-                                                  //name
-                                                  TableCell(child:  Center(child: Text('Name', style: Theme.of(context).textTheme.headlineMedium),),),
-                                                  // user id
-                                                  TableCell(child:  Center(child: Text('User Id', style: Theme.of(context).textTheme.headlineMedium),),),
-                                                  // email
-                                                  TableCell(child: Center(child: Text('Email', style: Theme.of(context).textTheme.headlineMedium),),),
-                                                  // mobile
-                                                  TableCell(child:  Center(child: Text('Mobile', style: Theme.of(context).textTheme.headlineMedium),),),
-                                                  // Edit
-                                                  TableCell(child:  Center(child: Text('Edit', style: Theme.of(context).textTheme.headlineMedium),),),
-
-                                                ]
-                                            ),
-
-                                            for (var i = 0; i < data.length; i++) ...[
-                                              if( data[i]["first_name"].toString().toLowerCase().startsWith(name.toLowerCase()))
-
-                                              //   if( storedocs[i]["Company Name"].toString().toLowerCase().startsWith(name.toLowerCase()))
-
-                                                TableRow(
-                                                    decoration: BoxDecoration(color: Colors.grey[200]),
-                                                    children:[
-                                                      //s.no
-                                                      TableCell(child:Row(
-                                                        children: [
-                                                   //       const SizedBox(width: 4,),
-                                                       //   IconButton( onPressed: () {}, icon:const Icon(Icons.add_circle,color: Colors.blue,)),
-                                                          // const SizedBox(width: 8,),
-                                                          Text("     "'${i+1}',),
-                                                          const SizedBox(width: 4,),
-                                                        ],
-                                                      ),),
-                                                      // name
-                                                      TableCell(child:Center(child: Column(children:  [ const SizedBox(height: 8,), Text('${data[i]["first_name"]}',), const SizedBox(height: 8,),])),),
-                                                      //User id
-                                                      const TableCell(child:Center(child: Text('2345678',)),),
-                                                      // email
-                                                      TableCell(child:Center(child: Text('${data[i]["email"]}',),),),
-                                                      //mobile
-                                                      TableCell(child:Center(child: Text('${data[i]["mobile"]}',),),),
-                                                      TableCell(child: Center(
-                                                            child: Column(
-                                                              children:  [
-                                                                const SizedBox(height: 8,),
-                                                                IconButton(onPressed: (){
-                                                                   Navigator.push(context,
-                                                                       MaterialPageRoute(builder: (context) =>  UpdateRegisterationPage(currentID: data[i]["id"])));
-                                                                },
-                                                                    icon:const Icon(Icons.edit_note,color: Colors.blue,)),
-                                                                const SizedBox(height: 8,),
-                                                              ],),)),
-
-                                                    ]
-                                                ),
-
-
-                                            ]
-                                          ],
-                                        ),
-                                        // const SizedBox(height: 30,),
-                                        Align(
-                                          alignment: Alignment.topRight,
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-
-                                             /* TablePaginator(
-                                                pageSizeOptions: const [2,5,10,25],
-                                                itemsPerPageLabel: "hello",
-                                                pageSize: pageSize,
-                                                pageIndex: activePage,
-                                                length: data.length,
-                                                onPageSizeChanged: (newValue) {
-                                                  setState(() {
-                                                    activePage = 0;
-                                                    pageSize = newValue;
-                                                  });
-                                                },
-                                                onSkipPreviousPressed: () {
-                                                  setState(() {
-                                                    activePage = 0;
-                                                  });
-                                                },
-                                                onPreviousPressed: () {
-                                                  setState(() {
-                                                    activePage = activePage - 1;
-                                                  });
-                                                },
-                                                onNextPressed: () {
-                                                  setState(() {
-                                                    activePage = activePage + 1;
-                                                  });
-                                                },
-                                                onSkipNextPressed: (lastPage) {
-                                                  setState(() {
-                                                    activePage = lastPage;
-                                                  });
-                                                },
-                                              ),*/
-                                            ],
-                                          ),
-                                        ),
-
-
-
-                                      ],
-                                    ),
-
-                                  ),
-                                )
-                                /*return PaginatedDataTable( source: _data,columns: [
-        DataColumn(label: Text('S.No', style: Theme.of(context).textTheme.headlineMedium),),
-        DataColumn(label: Text('Name', style: Theme.of(context).textTheme.headlineMedium),),
-        DataColumn(label: Text('User Id', style: Theme.of(context).textTheme.headlineMedium),)],);*/
-
-
-
-                                //return CircularProgressIndicator();   //Table ends
-
-
-
+                          const SizedBox(
+                            height: 40,
+                          ),
+                          Scrollbar(
+                            thumbVisibility: true,
+                            controller: _scrollController,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              controller: _scrollController,
+                              child: SizedBox(
+                                width:1000,
+                                child: PaginatedDataTable(
+                                    columnSpacing:50,
+                                    //  header: const Text("Report Details", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                    rowsPerPage:15,
+                                    columns:   const [
+                                      DataColumn(label: Center(child: Text("S.No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                      DataColumn(label: Center(child: Text("Name ",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                      DataColumn(label: Center(child: Text("Member ID ",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                      DataColumn(label: Center(child: Text("Mobile No",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                      DataColumn(label: Center(child: Text("Company Name",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                      DataColumn(label: Center(child: Text("Status",style: TextStyle(fontWeight: FontWeight.bold),))),
+                                    ],
+                                    source: MyDataTableSource(
+                                      data: filteredData,
+                                      context: context,
+                                    )
+                                ),
+                              ),
+                            ),
+                          ),
                         ]
                     ),
                   ),
@@ -288,37 +164,52 @@ class _WomensExecutiveMembersPageState extends State<WomensExecutiveMembersPage>
       ),
     );
   }
+  List<Map<String, dynamic>> filterData(String searchTerm) {
+    if (searchTerm.isEmpty) {
+      return data;
+    } else {
+      return data.where((item) => item["first_name"].toLowerCase().contains(searchTerm.toLowerCase())).toList();
+    }
+  }
 }
-/*class MyData extends DataTableSource {
-  String name="";
-  // Generate some made-up data
+class MyDataTableSource extends DataTableSource {
+  List<Map<String, dynamic>> data;
+  BuildContext context;
 
-  List<DocumentSnapshot> register = <DocumentSnapshot>[];
-  List<Map<String, dynamic>> _data = [];
+  MyDataTableSource({required this.data, required this.context,});
 
-  final user = FirebaseAuth.instance.currentUser;
+  @override
+  int get rowCount => data.length;
 
-  final CollectionReference _users =
-  FirebaseFirestore.instance.collection('Register');
   @override
   bool get isRowCountApproximate => false;
-  @override
-  int get rowCount => _data.length;
+
   @override
   int get selectedRowCount => 0;
+
   @override
   DataRow getRow(int index) {
-    return
-
-
-    DataRow(
-        cells: [
-   // for (var i = 0; i < _data.length; i++) ...[
-   // if( _data[i]["First Name"].toString().toLowerCase().startsWith(name.toLowerCase()))
-      DataCell(Text('${_data[index]["Email"]}',),),
-    DataCell(Text('${_data[index]["First Name"]}',),),
-      DataCell(Text("${_data[index]["Mobile"]}"),
-    )];
+    return DataRow(
+      cells: [
+        DataCell(Text('${index + 1}')),
+        DataCell(Text('${data[index]["first_name"]} ${data[index]["last_name"]}')),
+        DataCell(Text('${data[index]["member_id"]}')),
+        DataCell(Text('${data[index]["mobile"]}')),
+        DataCell(Text('${data[index]["company_name"]}')),
+        DataCell(
+          IconButton(onPressed: (){
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) =>  UpdateRegisterationPage(currentID: data[index]["id"])));
+          },
+              icon:const Icon(Icons.edit_note,color: Colors.blue,)),
+        ),
+      ],
+    );
   }
-}*/
+
+  @override
+  void rowsRefresh() {
+    // handle data refresh
+  }
+}
 
