@@ -27,6 +27,7 @@ class _AddMemeberRolePageState extends State<AddMemeberRolePage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController rolecontroller = TextEditingController();
   TextEditingController changerolecontroller = TextEditingController();
+  final ScrollController _scrollController=ScrollController();
   String MemName = "";
   ///First Letter capital code
   String capitalizeFirstLetter(String text) {
@@ -93,8 +94,8 @@ class _AddMemeberRolePageState extends State<AddMemeberRolePage> {
       final response = await http.delete(url);
       print("Delete Url: $url");
       if (response.statusCode == 200) {
-        // Success handling, e.g., show a success message
-       // Navigator.pop(context);
+        //Success handling, e.g., show a success message
+       Navigator.pop(context);
       }
       else {
         // Error handling, e.g., show an error message
@@ -190,196 +191,36 @@ class _AddMemeberRolePageState extends State<AddMemeberRolePage> {
                               if(_formKey.currentState!.validate()){
                                 addMemberRole();
                               }
-                            }, child: const Text('Submit'),),
+                            }, child: const Text('ADD'),),
 
                             const SizedBox(height: 25,),
-
-                            Align(
-                                    alignment: Alignment.center,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(70),
-                                      child: Container(
-                                        child: SingleChildScrollView(
-                                            scrollDirection: Axis.horizontal,
-                                            child: Table(
-                                                border: TableBorder.all(),
-                                                defaultColumnWidth: const FixedColumnWidth(200.0),
-                                                columnWidths: const <int, TableColumnWidth>{
-                                                  0:FixedColumnWidth(90),
-                                                  2:FixedColumnWidth(120),
-                                                  3:FixedColumnWidth(120),
-                                                },
-                                                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                                children:[
-                                                  //Table row starting
-                                                  TableRow(
-                                                      children: [
-                                                        TableCell(
-                                                            child:Center(
-                                                              child: Text('S.No',
-                                                                style: Theme.of(context).textTheme.headlineMedium,),)),
-                                                        //Meeting Name
-                                                        TableCell(
-                                                            child:Center(
-                                                              child: Text('Role',
-                                                                style: Theme.of(context).textTheme.headlineMedium,),)),
-                                                        // Edit
-                                                        TableCell(
-                                                          child: Center(
-                                                            child: Text('Edit',
-                                                              style: Theme.of(context).textTheme.headlineMedium,
-                                                            ),),),
-                                                        //Delete
-                                                        TableCell(
-                                                            child: Center(
-                                                              child: Column(
-                                                                children: [
-                                                                  const SizedBox(height: 8,),
-                                                                  Text('Delete',
-                                                                      style: Theme.of(context).textTheme.headlineMedium),
-                                                                  const SizedBox(height: 8,),],),)),
-                                                      ]),
-                                                  // Table row end
-                                                  for(var i = 0 ;i < data.length; i++) ...[
-                                                    //Table row start
-                                                    TableRow(
-                                                        decoration: BoxDecoration(color: Colors.grey[200]),
-                                                        children: [
-                                                          // 1 s.no
-                                                          TableCell(child: Center(child: Column(
-                                                            children: [
-                                                              const SizedBox(height: 4,),
-                                                              Text("${i+1}"),
-                                                              const SizedBox(height: 4,)
-                                                            ],
-                                                          ))),
-                                                          TableCell(child:Center(
-                                                            child: Column(
-                                                              children:  [
-                                                                const SizedBox(height: 4,),
-                                                                Text(data[i]["role"]),
-                                                                const SizedBox(height: 4,),],
-                                                            ),
-                                                          )
-                                                          ),
-
-                                                          //edit_note Tabel cell
-                                                          TableCell(
-                                                              child: Center(
-                                                                child: Column(
-                                                                  children:  [
-                                                                    const SizedBox(height: 4,),
-                                                                    IconButton(onPressed: (){
-                                                                      // _editnote(context);
-                                                                      showDialog<void>(
-                                                                        context: context,
-                                                                        builder: (BuildContext dialogContext) {
-                                                                          return AlertDialog(
-                                                                            backgroundColor: Colors.white,
-                                                                            title: const Text('Edit',),
-                                                                            content:  SizedBox(width: 300,
-                                                                              child: TextFormField(
-                                                                                onChanged: (value) {
-                                                                                  String capitalizedValue = capitalizeFirstLetter(value);
-                                                                                  changerolecontroller.value = changerolecontroller.value.copyWith(
-                                                                                    text: capitalizedValue,
-                                                                                    //selection: TextSelection.collapsed(offset: capitalizedValue.length),
-                                                                                  );
-                                                                                },
-
-                                                                                inputFormatters: [
-                                                                                  LengthLimitingTextInputFormatter(25),
-                                                                                AlphabetInputFormatter(),],
-                                                                                controller: changerolecontroller = TextEditingController(
-                                                                                    text: data[i]["role"]
-                                                                                ),
-                                                                                validator: (value){
-                                                                                  if(value!.isEmpty){
-                                                                                    return "enter the field";
-                                                                                  }else{
-                                                                                    return null;
-                                                                                  }
-                                                                                },
-                                                                                decoration: InputDecoration(
-                                                                                    suffixIcon: IconButton(onPressed: (){
-                                                                                      changerolecontroller.clear();
-                                                                                    }, icon: const Icon(Icons.cancel_presentation,color: Colors.red,))
-                                                                                ) ,
-                                                                              ),
-                                                                            ),
-                                                                            actions: <Widget>[
-                                                                              Row(
-                                                                                mainAxisAlignment: MainAxisAlignment.end,
-                                                                                children: [
-                                                                                  TextButton(
-                                                                                    child: const Text('Ok',),
-                                                                                    onPressed:  ()  {
-                                                                                      editRole(int.parse(data[i]["id"]));
-                                                                                      Navigator.pop(context);
-                                                                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                                                                          content: Text("You have Successfully Updated a Role")));
-                                                                                    },
-                                                                                  ),
-                                                                                  TextButton(
-                                                                                    child:  const Text('Cancel',),
-                                                                                    onPressed: () {
-                                                                                      Navigator.pop(context);
-                                                                                      // Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                                                                                    },
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-
-                                                                            ],
-                                                                          );
-                                                                        },
-                                                                      );
-                                                                    },
-                                                                        icon:const Icon(Icons.edit_note,color: Colors.blue,)),
-                                                                    const SizedBox(height: 4,),
-                                                                  ],),)),
-                                                          //delete Tabel cell
-                                                          TableCell(
-                                                              child: Center(
-                                                                child:  IconButton(
-                                                                    onPressed: (){
-                                                                      showDialog(
-                                                                          context: context,
-                                                                          builder: (ctx) =>
-                                                                          // Dialog box for register meeting and add guest
-                                                                          AlertDialog(
-                                                                            backgroundColor: Colors.grey[800],
-                                                                            title: const Text('Delete',
-                                                                                style: TextStyle(color: Colors.white)),
-                                                                            content: const Text("Do you want to Delete the role?",
-                                                                                style: TextStyle(color: Colors.white)),
-                                                                            actions: [
-                                                                              TextButton(
-                                                                                  onPressed: () async{
-                                                                                    delete(data[i]['id']);
-                                                                                    Navigator.pop(context);
-                                                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                                                                        content: Text("You have Successfully Deleted a Role")));
-                                                                                  },
-                                                                                  child: const Text('Yes')),
-                                                                              TextButton(
-                                                                                  onPressed: () {
-                                                                                    Navigator.pop(context);
-                                                                                  },
-                                                                                  child: const Text('No'))
-                                                                            ],
-                                                                          )
-                                                                      );
-                                                                    },
-                                                                    icon: const Icon(Icons.delete,color: Colors.red,)),
-                                                              )),]),
-                                                    // Table row end
-                                                  ]]   )
-                                        ),
-                                      ),
+                            Scrollbar(
+                              thumbVisibility: true,
+                              controller: _scrollController,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                controller: _scrollController,
+                                child: SizedBox(
+                                  width: 800,
+                                  child: PaginatedDataTable(
+                                    columnSpacing: 50,
+                                    rowsPerPage: 15,
+                                    columns: const [
+                                      DataColumn(label: Center(child: Text("S.No", style: TextStyle(fontWeight: FontWeight.bold)))),
+                                      DataColumn(label: Center(child: Text("Role", style: TextStyle(fontWeight: FontWeight.bold)))),
+                                      DataColumn(label: Center(child: Text("Edit", style: TextStyle(fontWeight: FontWeight.bold)))),
+                                      DataColumn(label: Center(child: Text("Delete", style: TextStyle(fontWeight: FontWeight.bold)))),
+                                    ],
+                                    source: MyDataTableSource4(
+                                      data: data,
+                                      editRole: editRole, // Pass the unblocked function here
+                                      delete: delete, // Pass the unblocked function here
+                                      context: context,
                                     ),
-                                  )
-
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       )),
@@ -389,6 +230,149 @@ class _AddMemeberRolePageState extends State<AddMemeberRolePage> {
             ),
           ),
         ));
+  }
+}
+class MyDataTableSource4 extends DataTableSource {
+  List<Map<String, dynamic>> data;
+  BuildContext context;
+  final Future<void> Function(int id) editRole;
+  final Future<void> Function(String id) delete;
+
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text.substring(0, 1).toUpperCase() + text.substring(1);
+  }
+
+  MyDataTableSource4({required this.data,
+    required this.editRole,
+    required this.delete,
+    required this.context});
+
+  @override
+  int get rowCount => data.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+TextEditingController changerolecontroller=TextEditingController();
+  @override
+  DataRow getRow(int index) {
+    return DataRow(
+      cells: [
+        DataCell(Text('${index + 1}')),
+        DataCell(Text('${data[index]["role"]}')),
+        DataCell(
+          IconButton(
+              onPressed: (){
+                showDialog(
+                    context: context,
+                    builder: (ctx) =>
+                    // Dialog box for register meeting and add guest
+                    AlertDialog(
+                      backgroundColor: Colors.grey[800],
+                      title: const Text('Delete',
+                          style: TextStyle(color: Colors.white)),
+                      content: const Text("Do you want to Delete the role?",
+                          style: TextStyle(color: Colors.white)),
+                      actions: [
+                        TextButton(
+                            onPressed: () async{
+                              delete(data[index]['id']);
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                  content: Text("You have Successfully Deleted a Role")));
+                            },
+                            child: const Text('Yes')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('No'))
+                      ],
+                    )
+                );
+              },
+              icon: const Icon(Icons.delete,color: Colors.red,)),
+
+        ),
+        DataCell(
+          IconButton(onPressed: (){
+            // _editnote(context);
+            showDialog<void>(
+              context: context,
+              builder: (BuildContext dialogContext) {
+                return AlertDialog(
+                  backgroundColor: Colors.white,
+                  title: const Text('Edit',),
+                  content:  SizedBox(width: 300,
+                    child: TextFormField(
+                      onChanged: (value) {
+                        String capitalizedValue = capitalizeFirstLetter(value);
+                        changerolecontroller.value = changerolecontroller.value.copyWith(
+                          text: capitalizedValue,
+                          //selection: TextSelection.collapsed(offset: capitalizedValue.length),
+                        );
+                      },
+
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(25),
+                        AlphabetInputFormatter(),],
+                      controller: changerolecontroller = TextEditingController(
+                          text: data[index]["role"]
+                      ),
+                      validator: (value){
+                        if(value!.isEmpty){
+                          return "enter the field";
+                        }else{
+                          return null;
+                        }
+                      },
+                      decoration: InputDecoration(
+                          suffixIcon: IconButton(onPressed: (){
+                            changerolecontroller.clear();
+                          }, icon: const Icon(Icons.cancel_presentation,color: Colors.red,))
+                      ) ,
+                    ),
+                  ),
+                  actions: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          child: const Text('Ok',),
+                          onPressed:  ()  {
+                            editRole(int.parse(data[index]["id"]));
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                content: Text("You have Successfully Updated a Role")));
+                          },
+                        ),
+                        TextButton(
+                          child:  const Text('Cancel',),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            // Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                          },
+                        ),
+                      ],
+                    ),
+
+                  ],
+                );
+              },
+            );
+          },
+              icon:const Icon(Icons.edit_note,color: Colors.blue,)),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void rowsRefresh() {
+    // handle data refresh
   }
 }
 
