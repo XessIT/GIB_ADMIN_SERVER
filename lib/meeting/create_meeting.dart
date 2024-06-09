@@ -110,6 +110,10 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
 
   String? _selectedMemberType=""; // Change the type to String?
 
+  /// for time
+  TimeOfDay? selectedFromTime;
+  TimeOfDay? selectedToTime;
+
   @override
   void initState() {
     getDistrict();
@@ -120,7 +124,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
     fromtime.text = "";
     totime.text = "";
     registrationopeningtime.text = "";
-   // init();
+    // init();
     super.initState();
   }
 
@@ -244,9 +248,17 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        setState(() {
-          teamNames = List<String>.from(responseData);
-        });
+        print('Response data: $responseData'); // Print the response data to inspect its structure
+
+        // Check if the response data is a list
+        if (responseData is List) {
+          setState(() {
+            // Extract the team names from the list of maps
+            teamNames = responseData.map((team) => team['team_name'].toString()).toList();
+          });
+        } else {
+          print('Unexpected JSON format: $responseData');
+        }
       } else {
         print('Error fetching team names: ${response.statusCode}');
       }
@@ -357,161 +369,161 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Card(
-                      elevation: 0,
+                        elevation: 0,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text("Add Meeting Details", style: Theme.of(context).textTheme.headlineMedium),
                         )),
                     Wrap(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: SizedBox(
-                                width: 300,
-                                child: TextFormField(
-                                    controller: _meetingdate,
-                                    validator: (value) {
-                                      if (value!.isEmpty) {
-                                        return "* Required Meeting Date";
-                                      } else {
-                                        return null;
-                                      }
-                                    },
-                                    //pickDate From Date
-                                    decoration: InputDecoration(
-                                      labelText: " Meeting Date  ",
-                                      suffixIcon: IconButton(
-                                        onPressed: () async {
-                                          DateTime? pickDate = await showDatePicker(
-                                              context: context,
-                                              initialDate: DateTime
-                                                  .now(),
-                                              firstDate: DateTime(
-                                                  1900),
-                                              lastDate: DateTime(
-                                                  2100));
-                                          if (pickDate == null)
-                                            return;
-                                          {
-                                            setState(() {
-                                              _meetingdate.text =
-                                                  DateFormat('dd/MM/yyyy').format(pickDate);
-                                            });
-                                          }
-                                        },
-                                        icon: const Icon(
-                                            Icons
-                                                .calendar_today_outlined),
-                                        color: Colors.green,),
-                                    )
-                                ),
-                              ),
-                            ),
-
-                            Expanded(
-                              child: Padding(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: SizedBox(
                                   width: 300,
                                   child: TextFormField(
-                                    controller: fromtime,
-                                    validator: (value) {
-                                      if (value!.isEmpty) {
-                                        return "* Required Time From";
-                                      } else {
-                                        return null;
-                                      }
-                                    },
-                                    readOnly:  true,
-                                    //pickDate From Date
-                                    decoration: InputDecoration(
-                                      labelText: "From Time",
-                                      //  icon:Icon( Icons.timer),
-                                      suffixIcon: IconButton(
-                                        onPressed: () async {
-                                          TimeOfDay? fromnewTime = await showTimePicker(
-                                              context: context,
-                                              initialTime: TimeOfDay.now());
-                                          //if 'cancel =null'
-                                          if (fromnewTime == null) return;
-                                          DateTime fromparsedTime = DateTime(
-                                            DateTime.now().year,
-                                            DateTime.now().month,
-                                            DateTime.now().day,
-                                            fromnewTime.hour,
-                                            fromnewTime.minute,
-                                          );
-                                          String fromformattedTime = DateFormat('hh:mm a').format(fromparsedTime);
-                                          //if 'ok = Timeofday
+                                      controller: _meetingdate,
+                                      onTap: () async {
+                                        DateTime? pickDate = await showDatePicker(
+                                            context: context,
+                                            initialDate: DateTime
+                                                .now(),
+                                            firstDate: DateTime.now(),
+                                            lastDate: DateTime(
+                                                2100));
+                                        if (pickDate == null)
+                                          return;
+                                        {
                                           setState(() {
-                                            fromtime.text = fromformattedTime;
+                                            _meetingdate.text =
+                                                DateFormat('dd/MM/yyyy').format(pickDate);
                                           });
-                                        },
-                                        icon: const Icon(
-                                            Icons
-                                                .watch_later_outlined),
-                                        color: Colors.green,),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                                        }
+                                      },
+                                      validator: (value) {
+                                        if (value!.isEmpty) {
+                                          return "* Required Meeting Date";
+                                        } else {
+                                          return null;
+                                        }
+                                      },
+                                      //pickDate From Date
+                                      decoration: InputDecoration(
+                                        labelText: " Meeting Date  ",
+                                        suffixIcon: Icon(Icons.calendar_today_outlined, color: Colors.green,),
 
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: SizedBox(
-                                  width: 300,
-                                  child: TextFormField(
-                                    controller: totime,
-                                    validator: (value) {
-                                      if (value!.isEmpty) {
-                                        return "* Required To Time";
-                                      } else {
-                                        return null;
-                                      }
-                                    },
-                                    readOnly:  true,
-                                    //pickDate From Date
-                                    decoration: InputDecoration(
-                                      labelText: "To Time",
-                                      //  icon:Icon( Icons.timer),
-                                      suffixIcon: IconButton(
-                                        onPressed: () async {
-                                          TimeOfDay? tonewTime = await showTimePicker(
-                                              context: context,
-                                              initialTime: TimeOfDay.now());
-                                          //if 'cancel =null'
-                                          if (tonewTime == null) return;
-                                          DateTime toparsedTime = DateTime(
-                                            DateTime.now().year,
-                                            DateTime.now().month,
-                                            DateTime.now().day,
-                                            tonewTime.hour,
-                                            tonewTime.minute,
-                                          );
-                                          String toformattedTime = DateFormat('hh:mm a').format(toparsedTime);
-                                          //if 'ok = Timeofday
-                                          setState(() {
-                                            totime.text =
-                                                toformattedTime;
-                                          });
-                                        },
-                                        icon: const Icon(
-                                            Icons
-                                                .watch_later_outlined),
-                                        color: Colors.green,),
+                                      )
+                                  ),
+                                ),
+                              ),
+
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SizedBox(
+                                    width: 300,
+                                    child: TextFormField(
+                                      controller: fromtime,
+                                      onTap: () async {
+                                        TimeOfDay? fromnewTime = await showTimePicker(
+                                            context: context,
+                                            initialTime: TimeOfDay.now());
+                                        if (fromnewTime == null) return;
+                                        selectedFromTime = fromnewTime;
+                                        DateTime fromparsedTime = DateTime(
+                                          DateTime.now().year,
+                                          DateTime.now().month,
+                                          DateTime.now().day,
+                                          fromnewTime.hour,
+                                          fromnewTime.minute,
+                                        );
+                                        String fromformattedTime = DateFormat('hh:mm a').format(fromparsedTime);
+                                        setState(() {
+                                          fromtime.text = fromformattedTime;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value!.isEmpty) {
+                                          return "* Required Time From";
+                                        } else {
+                                          return null;
+                                        }
+                                      },
+                                      readOnly: true,
+                                      decoration: InputDecoration(
+                                        labelText: "From Time",
+                                        suffixIcon: Icon(Icons.watch_later_outlined, color: Colors.green),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ]
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SizedBox(
+                                    width: 300,
+                                    child: TextFormField(
+                                      controller: totime,
+                                      onTap: () async {
+                                        TimeOfDay? tonewTime = await showTimePicker(
+                                            context: context,
+                                            initialTime: TimeOfDay.now());
+                                        if (tonewTime == null) return;
+                                        if (selectedFromTime != null && (tonewTime.hour < selectedFromTime!.hour ||
+                                            (tonewTime.hour == selectedFromTime!.hour && tonewTime.minute < selectedFromTime!.minute))) {
+                                          // Show an error dialog
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: Text('Invalid Time'),
+                                              content: Text('To Time cannot be earlier than From Time.'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('OK'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        selectedToTime = tonewTime;
+                                        DateTime toparsedTime = DateTime(
+                                          DateTime.now().year,
+                                          DateTime.now().month,
+                                          DateTime.now().day,
+                                          tonewTime.hour,
+                                          tonewTime.minute,
+                                        );
+                                        String toformattedTime = DateFormat('hh:mm a').format(toparsedTime);
+                                        setState(() {
+                                          totime.text = toformattedTime;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value!.isEmpty) {
+                                          return "* Required To Time";
+                                        } else {
+                                          return null;
+                                        }
+                                      },
+                                      readOnly: true,
+                                      decoration: InputDecoration(
+                                        labelText: "To Time",
+                                        suffixIcon: Icon(Icons.watch_later_outlined, color: Colors.green),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ]
                     ),   /// from time & totime  & meeitng date
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -523,6 +535,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                               width: 300,
                               child: TextFormField(
                                   controller: meetingnamecontroller,
+
                                   validator: (value) {
                                     if (value!.isEmpty) {
                                       return "* Required Meeting Name";
@@ -940,6 +953,20 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                               child: TextFormField(
                                   readOnly:  true,
                                   controller: _registrationopeningdate,
+                                  onTap: () async {
+                                    DateTime? pickDate = await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime
+                                            .now(),
+                                        firstDate: DateTime(1900),
+                                        lastDate: DateTime(2100));
+                                    if (pickDate == null) return;
+                                    {
+                                      setState(() {
+                                        _registrationopeningdate.text = DateFormat('dd/MM/yyyy').format(pickDate);
+                                      });
+                                    }
+                                  },
                                   validator: (value) {
                                     if (value!.isEmpty) {
                                       return "* Required Registration Opening Date";
@@ -951,24 +978,8 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   decoration: InputDecoration(
                                     label: const Text(
                                         " Registration Opening Date"),
-                                    suffixIcon: IconButton(
-                                      onPressed: () async {
-                                        DateTime? pickDate = await showDatePicker(
-                                            context: context,
-                                            initialDate: DateTime
-                                                .now(),
-                                            firstDate: DateTime(1900),
-                                            lastDate: DateTime(2100));
-                                        if (pickDate == null) return;
-                                        {
-                                          setState(() {
-                                            _registrationopeningdate.text = DateFormat('dd/MM/yyyy').format(pickDate);
-                                          });
-                                        }
-                                      }, icon: const Icon(
-                                        Icons
-                                            .calendar_today_outlined),
-                                      color: Colors.green,),
+                                    suffixIcon:  Icon(Icons.calendar_today_outlined,color: Colors.green,),
+
                                   )
                               ),
                             ),
@@ -983,6 +994,29 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                               child: TextFormField(
                                 readOnly:  true,
                                 controller: registrationopeningtime,
+                                onTap: () async {
+                                  TimeOfDay? schedulenewTime = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay.now());
+                                  //if 'cancel =null'
+                                  if (schedulenewTime == null)
+                                    return;
+                                  DateTime scheduleparsedTime = DateTime(
+                                    DateTime.now().year,
+                                    DateTime.now().month,
+                                    DateTime.now().day,
+                                    schedulenewTime.hour,
+                                    schedulenewTime.minute,
+                                  );
+                                  String scheduleformattedTime = DateFormat(
+                                      'hh:mm a').format(
+                                      scheduleparsedTime);
+                                  //if 'ok = Timeofday
+                                  setState(() {
+                                    registrationopeningtime.text =
+                                        scheduleformattedTime;
+                                  });
+                                },
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     return "* Required Registration Opening Time";
@@ -995,33 +1029,9 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   label: const Text(
                                       "Registration Opening Time"),
                                   //  icon:Icon( Icons.timer),
-                                  suffixIcon: IconButton(
-                                    onPressed: () async {
-                                      TimeOfDay? schedulenewTime = await showTimePicker(
-                                          context: context,
-                                          initialTime: TimeOfDay.now());
-                                      //if 'cancel =null'
-                                      if (schedulenewTime == null)
-                                        return;
-                                      DateTime scheduleparsedTime = DateTime(
-                                        DateTime.now().year,
-                                        DateTime.now().month,
-                                        DateTime.now().day,
-                                        schedulenewTime.hour,
-                                        schedulenewTime.minute,
-                                      );
-                                      String scheduleformattedTime = DateFormat(
-                                          'hh:mm a').format(
-                                          scheduleparsedTime);
-                                      //if 'ok = Timeofday
-                                      setState(() {
-                                        registrationopeningtime.text =
-                                            scheduleformattedTime;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                        Icons.watch_later_outlined),
-                                    color: Colors.green,),
+                                  suffixIcon:  Icon(
+                                        Icons.watch_later_outlined,     color: Colors.green),
+
                                 ),
                               ),
                             ),
@@ -1034,6 +1044,25 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                               width: 300,
                               child: TextFormField(
                                   controller: _registrationclosingdate,
+                                  onTap: () async {
+                                    DateTime? pickDate = await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime
+                                            .now(),
+                                        firstDate: DateTime(
+                                            1900),
+                                        lastDate: DateTime(
+                                            2100));
+                                    if (pickDate == null)
+                                      return;
+                                    {
+                                      setState(() {
+                                        _registrationclosingdate
+                                            .text =
+                                            DateFormat('dd/MM/yyyy').format(pickDate);
+                                      });
+                                    }
+                                  },
                                   validator: (value) {
                                     if (value!.isEmpty) {
                                       return "* Required Registration Closing Date";
@@ -1044,29 +1073,9 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   //pickDate From Date
                                   decoration: InputDecoration(
                                     labelText: "Registration Closing Date",
-                                    suffixIcon: IconButton(
-                                      onPressed: () async {
-                                        DateTime? pickDate = await showDatePicker(
-                                            context: context,
-                                            initialDate: DateTime
-                                                .now(),
-                                            firstDate: DateTime(
-                                                1900),
-                                            lastDate: DateTime(
-                                                2100));
-                                        if (pickDate == null)
-                                          return;
-                                        {
-                                          setState(() {
-                                            _registrationclosingdate
-                                                .text =
-                                                DateFormat('dd/MM/yyyy').format(pickDate);
-                                          });
-                                        }
-                                      }, icon: const Icon(
-                                        Icons
-                                            .calendar_today_outlined),
-                                      color: Colors.green,),
+                                    suffixIcon:
+                                      Icon(
+                                        Icons.calendar_today_outlined,  color: Colors.green,),
                                   )
                               ),
                             ),
@@ -1087,6 +1096,26 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                               child: TextFormField(
                                 readOnly: true,
                                 controller: registrationclosingtime,
+                                onTap: ()async {
+                                  TimeOfDay? closingnewTime = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay
+                                          .now());
+                                  //if 'cancel =null'
+                                  if (closingnewTime == null) return;
+                                  DateTime closingparsedTime = DateTime(
+                                    DateTime.now().year,
+                                    DateTime.now().month,
+                                    DateTime.now().day,
+                                    closingnewTime.hour,
+                                    closingnewTime.minute,
+                                  );
+                                  String closingformattedTime = DateFormat('hh:mm a').format(closingparsedTime);
+                                  //if 'ok = Timeofday
+                                  setState(() {
+                                    registrationclosingtime.text = closingformattedTime;
+                                  });
+                                },
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     return "* Required Closing Time";
@@ -1099,31 +1128,8 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   label: const Text(
                                       "Closing Time"),
                                   //  icon:Icon( Icons.timer),
-                                  suffixIcon: IconButton(
-                                    onPressed: () async {
-                                      TimeOfDay? closingnewTime = await showTimePicker(
-                                          context: context,
-                                          initialTime: TimeOfDay
-                                              .now());
-                                      //if 'cancel =null'
-                                      if (closingnewTime == null) return;
-                                      DateTime closingparsedTime = DateTime(
-                                        DateTime.now().year,
-                                        DateTime.now().month,
-                                        DateTime.now().day,
-                                        closingnewTime.hour,
-                                        closingnewTime.minute,
-                                      );
-                                      String closingformattedTime = DateFormat('hh:mm a').format(closingparsedTime);
-                                      //if 'ok = Timeofday
-                                      setState(() {
-                                        registrationclosingtime.text = closingformattedTime;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                        Icons
-                                            .watch_later_outlined),
-                                    color: Colors.green,),
+                                  suffixIcon:  Icon(
+                                        Icons.watch_later_outlined,  color: Colors.green,),
                                 ),
                               ),
                             ),
@@ -1168,12 +1174,12 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   elevation: 10,
                                   shadowColor: Colors.grey,
 
-                            ),
+                                ),
                                 onPressed: () {
                                   if (_formKey.currentState!
                                       .validate()) {
                                     addMeeting();
-                          
+
                                   }
 
                                 },
