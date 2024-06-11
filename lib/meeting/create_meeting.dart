@@ -1145,58 +1145,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SizedBox(
-                              width: 300,
-                              child: TextFormField(
-                                readOnly: true,
-                                controller: registrationclosingtime,
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return "* Required Closing Time";
-                                  } else {
-                                    return null;
-                                  }
-                                },
-                                //pickDate Closing Time
-                                decoration: InputDecoration(
-                                  label: const Text("Closing Time"),
-                                  //  icon:Icon( Icons.timer),
-                                  suffixIcon: IconButton(
-                                    onPressed: () async {
-                                      TimeOfDay? closingnewTime =
-                                      await showTimePicker(
-                                          context: context,
-                                          initialTime: TimeOfDay.now());
-                                      //if 'cancel =null'
-                                      if (closingnewTime == null) return;
-                                      DateTime closingparsedTime = DateTime(
-                                        DateTime.now().year,
-                                        DateTime.now().month,
-                                        DateTime.now().day,
-                                        closingnewTime.hour,
-                                        closingnewTime.minute,
-                                      );
-                                      String closingformattedTime =
-                                      DateFormat('hh:mm a')
-                                          .format(closingparsedTime);
-                                      //if 'ok = Timeofday
-                                      setState(() {
-                                        registrationclosingtime.text =
-                                            closingformattedTime;
-                                      });
-                                    },
-                                    icon:
-                                    const Icon(Icons.watch_later_outlined),
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+
 
                         /// regestiration closing time
                         Expanded(
