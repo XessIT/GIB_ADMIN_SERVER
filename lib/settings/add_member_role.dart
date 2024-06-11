@@ -63,31 +63,6 @@ class _AddMemeberRolePageState extends State<AddMemeberRolePage> {
       throw e; // rethrow the error if needed
     }
   }
-  Future<void> editRole(int id) async {
-    try {
-      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_role.php');
-      print(url);
-      print("Member Role: ${changerolecontroller.text}");
-      final response = await http.put(
-        url,
-        body: jsonEncode({
-          "member_role": changerolecontroller.text,
-          "id": id,
-        }),
-      );
-      if (response.statusCode == 200) {
-        print("Response Status: ${response.statusCode}");
-        print("Response Body: ${response.body}");
-        // Navigator.push(context, MaterialPageRoute(builder: (context) => const NewMemberApproval()));
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Successfully Edited")));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed to Edit")));
-      }
-    } catch (e) {
-      print("Error during signup: $e");
-      // Handle error as needed
-    }
-  }
   Future<void> delete(String id) async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_role.php?id=$id');
@@ -128,7 +103,7 @@ class _AddMemeberRolePageState extends State<AddMemeberRolePage> {
       if (response.statusCode == 200) {
         print("Response Status: ${response.statusCode}");
         print("Response Body: ${response.body}");
-        // Navigator.push(context, MaterialPageRoute(builder: (context) => const NewMemberApproval()));
+         Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemeberRole()));
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Successfully Added")));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed to Add")));
@@ -213,8 +188,8 @@ class _AddMemeberRolePageState extends State<AddMemeberRolePage> {
                                     ],
                                     source: MyDataTableSource4(
                                       data: data,
-                                      editRole: editRole, // Pass the unblocked function here
-                                      delete: delete, // Pass the unblocked function here
+                                      delete: delete,
+                                      member_role: rolecontroller.text,// Pass the unblocked function here
                                       context: context,
                                     ),
                                   ),
@@ -234,19 +209,22 @@ class _AddMemeberRolePageState extends State<AddMemeberRolePage> {
 }
 class MyDataTableSource4 extends DataTableSource {
   List<Map<String, dynamic>> data;
+  String member_role;
   BuildContext context;
-  final Future<void> Function(int id) editRole;
   final Future<void> Function(String id) delete;
+  TextEditingController changerolecontroller2;
+
+  MyDataTableSource4({
+    required this.data,
+    required this.member_role,
+    required this.delete,
+    required this.context,
+  }) : changerolecontroller2 = TextEditingController(text: member_role);
 
   String capitalizeFirstLetter(String text) {
     if (text.isEmpty) return text;
     return text.substring(0, 1).toUpperCase() + text.substring(1);
   }
-
-  MyDataTableSource4({required this.data,
-    required this.editRole,
-    required this.delete,
-    required this.context});
 
   @override
   int get rowCount => data.length;
@@ -254,49 +232,40 @@ class MyDataTableSource4 extends DataTableSource {
   @override
   bool get isRowCountApproximate => false;
 
+  Future<void> editRole(int id) async {
+    try {
+      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_role.php');
+      print(url);
+      print("Member Role: ${changerolecontroller2.text}");
+      final response = await http.put(
+        url,
+        body: jsonEncode({
+          "member_role": changerolecontroller2.text,
+          "id": id,
+        }),
+      );
+      if (response.statusCode == 200) {
+        print("Response Status: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemeberRole()));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Successfully Edited")));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed to Edit")));
+      }
+    } catch (e) {
+      print("Error during signup: $e");
+      // Handle error as needed
+    }
+  }
+
   @override
   int get selectedRowCount => 0;
-TextEditingController changerolecontroller=TextEditingController();
   @override
   DataRow getRow(int index) {
     return DataRow(
       cells: [
         DataCell(Text('${index + 1}')),
         DataCell(Text('${data[index]["role"]}')),
-        DataCell(
-          IconButton(
-              onPressed: (){
-                showDialog(
-                    context: context,
-                    builder: (ctx) =>
-                    // Dialog box for register meeting and add guest
-                    AlertDialog(
-                      backgroundColor: Colors.grey[800],
-                      title: const Text('Delete',
-                          style: TextStyle(color: Colors.white)),
-                      content: const Text("Do you want to Delete the role?",
-                          style: TextStyle(color: Colors.white)),
-                      actions: [
-                        TextButton(
-                            onPressed: () async{
-                              delete(data[index]['id']);
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                  content: Text("You have Successfully Deleted a Role")));
-                            },
-                            child: const Text('Yes')),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text('No'))
-                      ],
-                    )
-                );
-              },
-              icon: const Icon(Icons.delete,color: Colors.red,)),
-
-        ),
         DataCell(
           IconButton(onPressed: (){
             // _editnote(context);
@@ -310,7 +279,7 @@ TextEditingController changerolecontroller=TextEditingController();
                     child: TextFormField(
                       onChanged: (value) {
                         String capitalizedValue = capitalizeFirstLetter(value);
-                        changerolecontroller.value = changerolecontroller.value.copyWith(
+                        changerolecontroller2.value = changerolecontroller2.value.copyWith(
                           text: capitalizedValue,
                           //selection: TextSelection.collapsed(offset: capitalizedValue.length),
                         );
@@ -319,7 +288,7 @@ TextEditingController changerolecontroller=TextEditingController();
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(25),
                         AlphabetInputFormatter(),],
-                      controller: changerolecontroller = TextEditingController(
+                      controller: changerolecontroller2 = TextEditingController(
                           text: data[index]["role"]
                       ),
                       validator: (value){
@@ -331,7 +300,7 @@ TextEditingController changerolecontroller=TextEditingController();
                       },
                       decoration: InputDecoration(
                           suffixIcon: IconButton(onPressed: (){
-                            changerolecontroller.clear();
+                            changerolecontroller2.clear();
                           }, icon: const Icon(Icons.cancel_presentation,color: Colors.red,))
                       ) ,
                     ),
@@ -366,6 +335,41 @@ TextEditingController changerolecontroller=TextEditingController();
           },
               icon:const Icon(Icons.edit_note,color: Colors.blue,)),
         ),
+        DataCell(
+          IconButton(
+              onPressed: (){
+                showDialog(
+                    context: context,
+                    builder: (ctx) =>
+                    // Dialog box for register meeting and add guest
+                    AlertDialog(
+                      backgroundColor: Colors.grey[800],
+                      title: const Text('Delete',
+                          style: TextStyle(color: Colors.white)),
+                      content: const Text("Do you want to Delete the role?",
+                          style: TextStyle(color: Colors.white)),
+                      actions: [
+                        TextButton(
+                            onPressed: () async{
+                              delete(data[index]['id']);
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                  content: Text("You have Successfully Deleted a Role")));
+                            },
+                            child: const Text('Yes')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('No'))
+                      ],
+                    )
+                );
+              },
+              icon: const Icon(Icons.delete,color: Colors.red,)),
+
+        ),
+
       ],
     );
   }

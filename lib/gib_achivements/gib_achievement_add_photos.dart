@@ -80,7 +80,7 @@ class _AchievementPhotosPageState extends State<AchievementPhotosPage> {
                           Text("View Images",),
                           SizedBox(width: 10,),
                           Icon(
-                            Icons.video_camera_back,
+                            Icons.photo_library,
                             color: Colors.black,
                           ),
                         ],
@@ -231,7 +231,7 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(child: SizedBox(
-                  height: 50,
+                  //height: 50,
                   child:  TextFormField(
                     controller: dateController,
                     readOnly: true, // Make it read-only to prevent manual input
@@ -257,7 +257,7 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
 
                 )),
                 SizedBox(width: 20,),
-                Expanded(child: SizedBox(height: 50,
+                Expanded(child: SizedBox(//height: 50,
                   child: TextFormField(
                     controller: eventNameController,
                     decoration: InputDecoration(
@@ -274,7 +274,7 @@ class _AchievementImageAddState extends State<AchievementImageAdd> {
                     onChanged: (value) {
                       setState(() {
                         // This will re-validate the form and hide the error message
-                        _formKey.currentState?.validate();
+                        //_formKey.currentState?.validate();
                       });
                       String capitalizedValue = capitalizeFirstLetter(value);
                       eventNameController.value = eventNameController.value.copyWith(

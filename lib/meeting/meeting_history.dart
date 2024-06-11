@@ -173,136 +173,134 @@ class _MeetingHistoryPageState extends State<MeetingHistoryPage> {
                       SizedBox(
                         height: 20,
                       ),
-                      Container(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              SizedBox(
-                                width: 250,
-                                height: 50,
-                                child: TypeAheadFormField<String>(
-                                  textFieldConfiguration:
-                                      TextFieldConfiguration(
-                                    controller: districtController,
-                                    decoration: const InputDecoration(
-                                      fillColor: Colors.white,
-                                      filled: true,
-                                      labelText: "District",
-                                    ),
-                                  ),
-                                  suggestionsCallback: (pattern) async {
-                                    return suggesstiondata
-                                        .where((item) => (item['district']
-                                                    ?.toString()
-                                                    .toLowerCase() ??
-                                                '')
-                                            .startsWith(pattern.toLowerCase()))
-                                        .map((item) =>
-                                            item['district'].toString())
-                                        .toList();
-                                  },
-                                  itemBuilder: (context, suggestion) {
-                                    return ListTile(
-                                      title: Text(suggestion),
-                                    );
-                                  },
-                                  onSuggestionSelected: (suggestion) async {
-                                    districtController.text = suggestion;
-                                    await getChapter(
-                                        districtController.text.trim());
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                width: 250,
-                                height: 50,
-                                child: TypeAheadFormField<String>(
-                                  textFieldConfiguration:
-                                      TextFieldConfiguration(
-                                    controller: chapterController,
-                                    decoration: const InputDecoration(
-                                      fillColor: Colors.white,
-                                      filled: true,
-                                      labelText: "Chapter",
-                                    ),
-                                  ),
-                                  suggestionsCallback: (pattern) async {
-                                    return suggesstiondataitemName
-                                        .where((item) => (item['chapter']
-                                                    ?.toString()
-                                                    .toLowerCase() ??
-                                                '')
-                                            .startsWith(pattern.toLowerCase()))
-                                        .map((item) =>
-                                            item['chapter'].toString())
-                                        .toList();
-                                  },
-                                  itemBuilder: (context, suggestion) {
-                                    return ListTile(
-                                      title: Text(suggestion),
-                                    );
-                                  },
-                                  onSuggestionSelected: (suggestion) async {
-                                    chapterController.text = suggestion;
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                width: 250,
-                                height: 50,
-                                child: DropdownButtonFormField<String>(
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 200,
+                              height: 40,
+                              child: TypeAheadFormField<String>(
+                                textFieldConfiguration:
+                                    TextFieldConfiguration(
+                                  controller: districtController,
                                   decoration: const InputDecoration(
                                     fillColor: Colors.white,
                                     filled: true,
-                                    labelText: "Member Type",
+                                    labelText: "District",
                                   ),
-                                  value: selectedMemberType,
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      selectedMemberType = newValue;
-                                      updateMeetingTypes(newValue);
-                                    });
-                                  },
-                                  items: [
-                                    "Executive Men's Wgiing",
-                                    "Executive Women's Wing",
-                                    "Doctor's Wing",
-                                    "Non-Executive"
-                                  ].map((memberType) {
-                                    return DropdownMenuItem(
-                                      value: memberType,
-                                      child: Text(memberType),
-                                    );
-                                  }).toList(),
                                 ),
+                                suggestionsCallback: (pattern) async {
+                                  return suggesstiondata
+                                      .where((item) => (item['district']
+                                                  ?.toString()
+                                                  .toLowerCase() ??
+                                              '')
+                                          .startsWith(pattern.toLowerCase()))
+                                      .map((item) =>
+                                          item['district'].toString())
+                                      .toList();
+                                },
+                                itemBuilder: (context, suggestion) {
+                                  return ListTile(
+                                    title: Text(suggestion),
+                                  );
+                                },
+                                onSuggestionSelected: (suggestion) async {
+                                  districtController.text = suggestion;
+                                  await getChapter(
+                                      districtController.text.trim());
+                                },
                               ),
-                              SizedBox(
-                                width: 250,
-                                height: 50,
-                                child: DropdownButtonFormField<String>(
+                            ),
+                            SizedBox(
+                              width: 200,
+                              height: 40,
+                              child: TypeAheadFormField<String>(
+                                textFieldConfiguration:
+                                    TextFieldConfiguration(
+                                  controller: chapterController,
                                   decoration: const InputDecoration(
                                     fillColor: Colors.white,
                                     filled: true,
-                                    labelText: "Meeting Type",
+                                    labelText: "Chapter",
                                   ),
-                                  value: selectedMeetingType,
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      selectedMeetingType = newValue;
-                                    });
-                                  },
-                                  items: meetingTypes.map((meetingType) {
-                                    return DropdownMenuItem(
-                                      value: meetingType,
-                                      child: Text(meetingType),
-                                    );
-                                  }).toList(),
                                 ),
+                                suggestionsCallback: (pattern) async {
+                                  return suggesstiondataitemName
+                                      .where((item) => (item['chapter']
+                                                  ?.toString()
+                                                  .toLowerCase() ??
+                                              '')
+                                          .startsWith(pattern.toLowerCase()))
+                                      .map((item) =>
+                                          item['chapter'].toString())
+                                      .toList();
+                                },
+                                itemBuilder: (context, suggestion) {
+                                  return ListTile(
+                                    title: Text(suggestion),
+                                  );
+                                },
+                                onSuggestionSelected: (suggestion) async {
+                                  chapterController.text = suggestion;
+                                },
                               ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(
+                              width: 200,
+                              height: 40,
+                              child: DropdownButtonFormField<String>(
+                                decoration: const InputDecoration(
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  labelText: "Member Type",
+                                ),
+                                value: selectedMemberType,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedMemberType = newValue;
+                                    updateMeetingTypes(newValue);
+                                  });
+                                },
+                                items: [
+                                  "Executive Men's Wing",
+                                  "Executive Women's Wing",
+                                  "Doctor's Wing",
+                                  "Non-Executive"
+                                ].map((memberType) {
+                                  return DropdownMenuItem(
+                                    value: memberType,
+                                    child: Text(memberType),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 200,
+                              height: 40,
+                              child: DropdownButtonFormField<String>(
+                                decoration: const InputDecoration(
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  labelText: "Meeting Type",
+                                ),
+                                value: selectedMeetingType,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedMeetingType = newValue;
+                                  });
+                                },
+                                items: meetingTypes.map((meetingType) {
+                                  return DropdownMenuItem(
+                                    value: meetingType,
+                                    child: Text(meetingType),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 20),

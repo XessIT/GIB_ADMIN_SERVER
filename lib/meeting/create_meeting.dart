@@ -186,7 +186,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   Future<void> getMeeting() async {
     try {
       final url =
-          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_meeting.php');
+      Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_meeting.php');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -207,7 +207,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   Future<void> getMember() async {
     try {
       final url =
-          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_type.php');
+      Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_type.php');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -258,20 +258,20 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   Future<void> addMeeting() async {
     try {
       final DateTime parsedMeetingDate =
-          DateFormat('dd/MM/yyyy').parse(_meetingdate.text);
+      DateFormat('dd/MM/yyyy').parse(_meetingdate.text);
       final formattedMeetingDate =
-          DateFormat('yyyy/MM/dd').format(parsedMeetingDate);
+      DateFormat('yyyy/MM/dd').format(parsedMeetingDate);
       final DateTime parsedOpenDate =
-          DateFormat('dd/MM/yyyy').parse(_registrationopeningdate.text);
+      DateFormat('dd/MM/yyyy').parse(_registrationopeningdate.text);
       final formattedOpenDate = DateFormat('yyyy/MM/dd').format(parsedOpenDate);
       final DateTime parsedCloseDate =
-          DateFormat('dd/MM/yyyy').parse(_registrationclosingdate.text);
+      DateFormat('dd/MM/yyyy').parse(_registrationclosingdate.text);
       final formattedCloseDate =
-          DateFormat('yyyy/MM/dd').format(parsedCloseDate);
+      DateFormat('yyyy/MM/dd').format(parsedCloseDate);
       final String teamNamesString = selectedItems.join(',');
 
       final url =
-          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/create_meeting.php');
+      Uri.parse('http://mybudgetbook.in/GIBADMINAPI/create_meeting.php');
       print(url);
       final response = await http.post(
         url,
@@ -313,7 +313,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   Future<void> getMemberType() async {
     try {
       final url =
-          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/member_type.php');
+      Uri.parse('http://mybudgetbook.in/GIBADMINAPI/member_type.php');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -369,7 +369,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: Text("Add Meeting Details",
                               style:
-                                  Theme.of(context).textTheme.headlineMedium),
+                              Theme.of(context).textTheme.headlineMedium),
                         )),
                     Wrap(children: [
                       Row(
@@ -389,25 +389,28 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                         return null;
                                       }
                                     },
+                                    onTap: () async {
+                                      DateTime? pickDate =
+                                          await showDatePicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime(1900),
+                                          lastDate: DateTime(2100));
+                                      if (pickDate == null) return;
+                                      {
+                                        setState(() {
+                                          _meetingdate.text =
+                                              DateFormat('dd/MM/yyyy')
+                                                  .format(pickDate);
+                                        });
+                                      }
+                                    },
                                     //pickDate From Date
                                     decoration: InputDecoration(
                                       labelText: " Meeting Date  ",
                                       suffixIcon: IconButton(
                                         onPressed: () async {
-                                          DateTime? pickDate =
-                                              await showDatePicker(
-                                                  context: context,
-                                                  initialDate: DateTime.now(),
-                                                  firstDate: DateTime(1900),
-                                                  lastDate: DateTime(2100));
-                                          if (pickDate == null) return;
-                                          {
-                                            setState(() {
-                                              _meetingdate.text =
-                                                  DateFormat('dd/MM/yyyy')
-                                                      .format(pickDate);
-                                            });
-                                          }
+
                                         },
                                         icon: const Icon(
                                             Icons.calendar_today_outlined),
@@ -431,6 +434,28 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       return null;
                                     }
                                   },
+                                  onTap: () async {
+                                    TimeOfDay? fromnewTime =
+                                    await showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.now());
+                                    //if 'cancel =null'
+                                    if (fromnewTime == null) return;
+                                    DateTime fromparsedTime = DateTime(
+                                      DateTime.now().year,
+                                      DateTime.now().month,
+                                      DateTime.now().day,
+                                      fromnewTime.hour,
+                                      fromnewTime.minute,
+                                    );
+                                    String fromformattedTime =
+                                    DateFormat('hh:mm a')
+                                        .format(fromparsedTime);
+                                    //if 'ok = Timeofday
+                                    setState(() {
+                                      fromtime.text = fromformattedTime;
+                                    });
+                                  },
                                   readOnly: true,
                                   //pickDate From Date
                                   decoration: InputDecoration(
@@ -438,26 +463,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                     //  icon:Icon( Icons.timer),
                                     suffixIcon: IconButton(
                                       onPressed: () async {
-                                        TimeOfDay? fromnewTime =
-                                            await showTimePicker(
-                                                context: context,
-                                                initialTime: TimeOfDay.now());
-                                        //if 'cancel =null'
-                                        if (fromnewTime == null) return;
-                                        DateTime fromparsedTime = DateTime(
-                                          DateTime.now().year,
-                                          DateTime.now().month,
-                                          DateTime.now().day,
-                                          fromnewTime.hour,
-                                          fromnewTime.minute,
-                                        );
-                                        String fromformattedTime =
-                                            DateFormat('hh:mm a')
-                                                .format(fromparsedTime);
-                                        //if 'ok = Timeofday
-                                        setState(() {
-                                          fromtime.text = fromformattedTime;
-                                        });
+
                                       },
                                       icon: const Icon(
                                           Icons.watch_later_outlined),
@@ -482,6 +488,28 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       return null;
                                     }
                                   },
+                                  onTap: () async {
+                                    TimeOfDay? tonewTime =
+                                    await showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.now());
+                                    //if 'cancel =null'
+                                    if (tonewTime == null) return;
+                                    DateTime toparsedTime = DateTime(
+                                      DateTime.now().year,
+                                      DateTime.now().month,
+                                      DateTime.now().day,
+                                      tonewTime.hour,
+                                      tonewTime.minute,
+                                    );
+                                    String toformattedTime =
+                                    DateFormat('hh:mm a')
+                                        .format(toparsedTime);
+                                    //if 'ok = Timeofday
+                                    setState(() {
+                                      totime.text = toformattedTime;
+                                    });
+                                  },
                                   readOnly: true,
                                   //pickDate From Date
                                   decoration: InputDecoration(
@@ -489,26 +517,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                     //  icon:Icon( Icons.timer),
                                     suffixIcon: IconButton(
                                       onPressed: () async {
-                                        TimeOfDay? tonewTime =
-                                            await showTimePicker(
-                                                context: context,
-                                                initialTime: TimeOfDay.now());
-                                        //if 'cancel =null'
-                                        if (tonewTime == null) return;
-                                        DateTime toparsedTime = DateTime(
-                                          DateTime.now().year,
-                                          DateTime.now().month,
-                                          DateTime.now().day,
-                                          tonewTime.hour,
-                                          tonewTime.minute,
-                                        );
-                                        String toformattedTime =
-                                            DateFormat('hh:mm a')
-                                                .format(toparsedTime);
-                                        //if 'ok = Timeofday
-                                        setState(() {
-                                          totime.text = toformattedTime;
-                                        });
+
                                       },
                                       icon: const Icon(
                                           Icons.watch_later_outlined),
@@ -529,67 +538,67 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                       children: [
                         Expanded(
                             child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            width: 300,
-                            child: TypeAheadFormField<String>(
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: memberController,
-                                decoration: InputDecoration(
-                                  labelText: 'Member Type',
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                ),
-                              ),
-                              suggestionsCallback: (pattern) {
-                                return memberSuggestion
-                                    .map((item) =>
+                              padding: EdgeInsets.all(8.0),
+                              child: SizedBox(
+                                width: 300,
+                                child: TypeAheadFormField<String>(
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: memberController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Member Type',
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                    ),
+                                  ),
+                                  suggestionsCallback: (pattern) {
+                                    return memberSuggestion
+                                        .map((item) =>
                                         item['member_type'].toString())
-                                    .toList();
-                              },
-                              itemBuilder: (context, String suggestion) {
-                                return CheckboxListTile(
-                                  title: Text(suggestion),
-                                  value:
+                                        .toList();
+                                  },
+                                  itemBuilder: (context, String suggestion) {
+                                    return CheckboxListTile(
+                                      title: Text(suggestion),
+                                      value:
                                       _selectedMemberTypes.contains(suggestion),
-                                  onChanged: (bool? value) {
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          if (value != null && value) {
+                                            _selectedMemberTypes.add(suggestion);
+                                            memberController.text =
+                                                suggestion; // Update text field
+                                          } else {
+                                            _selectedMemberTypes.remove(suggestion);
+                                          }
+                                          _updateTextField(); // Update text field
+                                        });
+                                      },
+                                    );
+                                  },
+                                  onSuggestionSelected: (String? suggestion) {
                                     setState(() {
-                                      if (value != null && value) {
-                                        _selectedMemberTypes.add(suggestion);
-                                        memberController.text =
-                                            suggestion; // Update text field
-                                      } else {
-                                        _selectedMemberTypes.remove(suggestion);
+                                      if (suggestion != null) {
+                                        if (_selectedMemberTypes
+                                            .contains(suggestion)) {
+                                          _selectedMemberTypes.remove(suggestion);
+                                        } else {
+                                          _selectedMemberTypes.add(suggestion);
+                                          memberController.text =
+                                              suggestion; // Update text field
+                                        }
+                                        _updateTextField(); // Update text field
                                       }
-                                      _updateTextField(); // Update text field
                                     });
                                   },
-                                );
-                              },
-                              onSuggestionSelected: (String? suggestion) {
-                                setState(() {
-                                  if (suggestion != null) {
-                                    if (_selectedMemberTypes
-                                        .contains(suggestion)) {
-                                      _selectedMemberTypes.remove(suggestion);
-                                    } else {
-                                      _selectedMemberTypes.add(suggestion);
-                                      memberController.text =
-                                          suggestion; // Update text field
+                                  validator: (value) {
+                                    if (_selectedMemberTypes.isEmpty) {
+                                      return 'Select at least one member type';
                                     }
-                                    _updateTextField(); // Update text field
-                                  }
-                                });
-                              },
-                              validator: (value) {
-                                if (_selectedMemberTypes.isEmpty) {
-                                  return 'Select at least one member type';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        )),
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            )),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -601,18 +610,27 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   decoration: const InputDecoration(
                                       fillColor: Colors.white,
                                       filled: true,
-                                      labelText: "Meeting Type"),
+                                      labelText: "Meeting Type"
+                                  ),
                                 ),
                                 suggestionsCallback: (pattern) async {
-                                  return meetingsuggesstion
-                                      .where((item) => (item['meeting_type']
-                                                  ?.toString()
-                                                  .toLowerCase() ??
-                                              '')
-                                          .startsWith(pattern.toLowerCase()))
-                                      .map((item) =>
-                                          item['meeting_type'].toString())
-                                      .toList();
+                                  if (_selectedMemberTypes.isEmpty) {
+                                    return [];
+                                  }
+                                  // Filter meetings based on selected member type
+                                  List<String> filteredMeetings = [];
+                                  if (_selectedMemberTypes.contains('Non-Executive')) {
+                                    // If Non-Executive is selected, show only Training Program
+                                    filteredMeetings.add('Training Program');
+                                  } else {
+                                    // Otherwise, show all meetings
+                                    filteredMeetings = meetingsuggesstion
+                                        .where((item) => (item['meeting_type']?.toString().toLowerCase() ?? '')
+                                        .startsWith(pattern.toLowerCase()))
+                                        .map((item) => item['meeting_type'].toString())
+                                        .toList();
+                                  }
+                                  return filteredMeetings;
                                 },
                                 validator: (value) {
                                   if (value!.isEmpty) {
@@ -635,6 +653,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                             ),
                           ),
                         ),
+
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -651,13 +670,13 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   },
                                   onChanged: (value) {
                                     String capitalizedValue =
-                                        capitalizeFirstLetter(value);
+                                    capitalizeFirstLetter(value);
                                     meetingnamecontroller.value =
                                         meetingnamecontroller.value.copyWith(
-                                      text: capitalizedValue,
-                                      selection: TextSelection.collapsed(
-                                          offset: capitalizedValue.length),
-                                    );
+                                          text: capitalizedValue,
+                                          selection: TextSelection.collapsed(
+                                              offset: capitalizedValue.length),
+                                        );
                                   },
                                   decoration: const InputDecoration(
                                     label: Text('Meeting Name'),
@@ -694,10 +713,10 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                 suggestionsCallback: (pattern) async {
                                   return suggesstiondata
                                       .where((item) => (item['district']
-                                                  ?.toString()
-                                                  .toLowerCase() ??
-                                              '')
-                                          .startsWith(pattern.toLowerCase()))
+                                      ?.toString()
+                                      .toLowerCase() ??
+                                      '')
+                                      .startsWith(pattern.toLowerCase()))
                                       .map(
                                           (item) => item['district'].toString())
                                       .toList();
@@ -746,10 +765,10 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                 suggestionsCallback: (pattern) async {
                                   return suggesstiondataitemName
                                       .where((item) => (item['chapter']
-                                                  ?.toString()
-                                                  .toLowerCase() ??
-                                              '')
-                                          .startsWith(pattern.toLowerCase()))
+                                      ?.toString()
+                                      .toLowerCase() ??
+                                      '')
+                                      .startsWith(pattern.toLowerCase()))
                                       .map((item) => item['chapter'].toString())
                                       .toList();
                                 },
@@ -797,13 +816,13 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   ],
                                   onChanged: (value) {
                                     String capitalizedValue =
-                                        capitalizeFirstLetter(value);
+                                    capitalizeFirstLetter(value);
                                     placecontroller.value =
                                         placecontroller.value.copyWith(
-                                      text: capitalizedValue,
-                                      selection: TextSelection.collapsed(
-                                          offset: capitalizedValue.length),
-                                    );
+                                          text: capitalizedValue,
+                                          selection: TextSelection.collapsed(
+                                              offset: capitalizedValue.length),
+                                        );
                                   },
                                   //pickDate From Date
                                   decoration: const InputDecoration(
@@ -845,42 +864,42 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                                         setState(() {
                                                           // Toggle the selection state of the tapped item
                                                           selectedValues[
-                                                                  value] =
-                                                              !(selectedValues[
-                                                                      value] ??
-                                                                  false);
+                                                          value] =
+                                                          !(selectedValues[
+                                                          value] ??
+                                                              false);
                                                         });
                                                       },
                                                       child: Container(
                                                         color: selectedValues[
-                                                                    value] ??
-                                                                false
+                                                        value] ??
+                                                            false
                                                             ? Colors
-                                                                .green // Color for selected items
+                                                            .green // Color for selected items
                                                             : Colors
-                                                                .white, // Color for unselected items
+                                                            .white, // Color for unselected items
                                                         child: Padding(
                                                           padding: EdgeInsets
                                                               .symmetric(
-                                                                  horizontal:
-                                                                      16.0,
-                                                                  vertical:
-                                                                      8.0),
+                                                              horizontal:
+                                                              16.0,
+                                                              vertical:
+                                                              8.0),
                                                           child: Row(
                                                             mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
                                                             children: [
                                                               Text(
                                                                 value,
                                                                 style: Theme.of(
-                                                                        context)
+                                                                    context)
                                                                     .textTheme
                                                                     .headlineMedium!
                                                                     .copyWith(),
                                                               ),
                                                               if (selectedValues[
-                                                                      value] ??
+                                                              value] ??
                                                                   false)
                                                                 Icon(
                                                                     Icons.check,
@@ -904,10 +923,10 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                                           selectedValues.entries
                                                               .where(
                                                                   (entry) =>
-                                                                      entry
-                                                                          .value)
+                                                              entry
+                                                                  .value)
                                                               .map((entry) =>
-                                                                  entry.key)
+                                                          entry.key)
                                                               .toList();
                                                     });
                                                   },
@@ -920,8 +939,8 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       },
                                       style: ButtonStyle(
                                         backgroundColor:
-                                            MaterialStateProperty.all(
-                                                Colors.blue),
+                                        MaterialStateProperty.all(
+                                            Colors.blue),
                                       ),
                                       child: Container(
                                         child: Padding(
@@ -949,7 +968,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       ),
                                       Column(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                         children: selectedValues.keys
                                             .map((String value) {
                                           if (selectedValues[value] ?? false) {
@@ -992,7 +1011,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: Text("Registration Details",
                               style:
-                                  Theme.of(context).textTheme.headlineMedium),
+                              Theme.of(context).textTheme.headlineMedium),
                         )),
 
                     Row(
@@ -1013,26 +1032,29 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       return null;
                                     }
                                   },
+                                  onTap: () async {
+                                    DateTime? pickDate =
+                                        await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime(1900),
+                                        lastDate: DateTime(2100));
+                                    if (pickDate == null) return;
+                                    {
+                                      setState(() {
+                                        _registrationopeningdate.text =
+                                            DateFormat('dd/MM/yyyy')
+                                                .format(pickDate);
+                                      });
+                                    }
+                                  },
                                   //pickDate scheduledate
                                   decoration: InputDecoration(
                                     label: const Text(
                                         " Registration Opening Date"),
                                     suffixIcon: IconButton(
                                       onPressed: () async {
-                                        DateTime? pickDate =
-                                            await showDatePicker(
-                                                context: context,
-                                                initialDate: DateTime.now(),
-                                                firstDate: DateTime(1900),
-                                                lastDate: DateTime(2100));
-                                        if (pickDate == null) return;
-                                        {
-                                          setState(() {
-                                            _registrationopeningdate.text =
-                                                DateFormat('dd/MM/yyyy')
-                                                    .format(pickDate);
-                                          });
-                                        }
+
                                       },
                                       icon: const Icon(
                                           Icons.calendar_today_outlined),
@@ -1043,7 +1065,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                           ),
                         ),
 
-                        Expanded(
+                       /* Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: SizedBox(
@@ -1061,14 +1083,14 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                 //pickDate From Date
                                 decoration: InputDecoration(
                                   label:
-                                      const Text("Registration Opening Time"),
+                                  const Text("Registration Opening Time"),
                                   //  icon:Icon( Icons.timer),
                                   suffixIcon: IconButton(
                                     onPressed: () async {
                                       TimeOfDay? schedulenewTime =
-                                          await showTimePicker(
-                                              context: context,
-                                              initialTime: TimeOfDay.now());
+                                      await showTimePicker(
+                                          context: context,
+                                          initialTime: TimeOfDay.now());
                                       //if 'cancel =null'
                                       if (schedulenewTime == null) return;
                                       DateTime scheduleparsedTime = DateTime(
@@ -1079,8 +1101,8 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                         schedulenewTime.minute,
                                       );
                                       String scheduleformattedTime =
-                                          DateFormat('hh:mm a')
-                                              .format(scheduleparsedTime);
+                                      DateFormat('hh:mm a')
+                                          .format(scheduleparsedTime);
                                       //if 'ok = Timeofday
                                       setState(() {
                                         registrationopeningtime.text =
@@ -1088,14 +1110,14 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       });
                                     },
                                     icon:
-                                        const Icon(Icons.watch_later_outlined),
+                                    const Icon(Icons.watch_later_outlined),
                                     color: Colors.green,
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
+                        ),*/
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -1110,25 +1132,28 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       return null;
                                     }
                                   },
+                                  onTap: () async{
+                                    DateTime? pickDate =
+                                        await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime(1900),
+                                        lastDate: DateTime(2100));
+                                    if (pickDate == null) return;
+                                    {
+                                      setState(() {
+                                        _registrationclosingdate.text =
+                                            DateFormat('dd/MM/yyyy')
+                                                .format(pickDate);
+                                      });
+                                    }
+                                  },
                                   //pickDate From Date
                                   decoration: InputDecoration(
                                     labelText: "Registration Closing Date",
                                     suffixIcon: IconButton(
                                       onPressed: () async {
-                                        DateTime? pickDate =
-                                            await showDatePicker(
-                                                context: context,
-                                                initialDate: DateTime.now(),
-                                                firstDate: DateTime(1900),
-                                                lastDate: DateTime(2100));
-                                        if (pickDate == null) return;
-                                        {
-                                          setState(() {
-                                            _registrationclosingdate.text =
-                                                DateFormat('dd/MM/yyyy')
-                                                    .format(pickDate);
-                                          });
-                                        }
+
                                       },
                                       icon: const Icon(
                                           Icons.calendar_today_outlined),
@@ -1142,7 +1167,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                         /// regesitration closing date
                       ],
                     ),
-                    Row(
+                  /*  Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Expanded(
@@ -1167,9 +1192,9 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   suffixIcon: IconButton(
                                     onPressed: () async {
                                       TimeOfDay? closingnewTime =
-                                          await showTimePicker(
-                                              context: context,
-                                              initialTime: TimeOfDay.now());
+                                      await showTimePicker(
+                                          context: context,
+                                          initialTime: TimeOfDay.now());
                                       //if 'cancel =null'
                                       if (closingnewTime == null) return;
                                       DateTime closingparsedTime = DateTime(
@@ -1180,8 +1205,8 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                         closingnewTime.minute,
                                       );
                                       String closingformattedTime =
-                                          DateFormat('hh:mm a')
-                                              .format(closingparsedTime);
+                                      DateFormat('hh:mm a')
+                                          .format(closingparsedTime);
                                       //if 'ok = Timeofday
                                       setState(() {
                                         registrationclosingtime.text =
@@ -1189,7 +1214,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       });
                                     },
                                     icon:
-                                        const Icon(Icons.watch_later_outlined),
+                                    const Icon(Icons.watch_later_outlined),
                                     color: Colors.green,
                                   ),
                                 ),
@@ -1216,7 +1241,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                           ),
                         ),
                       ],
-                    ),
+                    ),*/
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -1244,7 +1269,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                 child: Text(
                                   "Submit",
                                   style:
-                                      Theme.of(context).textTheme.displayMedium,
+                                  Theme.of(context).textTheme.displayMedium,
                                 )),
                           ),
                         ),
@@ -1290,9 +1315,9 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
 class AlphabetInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
     // Filter out non-alphabetic characters
     String filteredText = newValue.text.replaceAll(RegExp(r'[^a-zA-Z]'), '');
 

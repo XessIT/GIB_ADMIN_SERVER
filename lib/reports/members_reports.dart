@@ -259,6 +259,96 @@ class _MembersReportPageState extends State<MembersReportPage> {
                                 IconButton(onPressed: (){
                                   Navigator.pushNamed(context, '/members_report_page');
                                 }, icon: Icon(Icons.refresh)),
+                                SizedBox(width: 10,),
+                                SizedBox(
+                                  width: 170, height: 35,
+                                  child: TypeAheadFormField<String>(
+                                    textFieldConfiguration: TextFieldConfiguration(
+                                      controller: memberID,
+                                      decoration: const InputDecoration(
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                        labelText: "Member ID",
+                                        labelStyle: TextStyle(fontSize: 14),
+                                      ),
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                    suggestionsCallback: (pattern) async {
+                                      // Create a Set to store distinct member IDs
+                                      final distinctMemberIds = <String>{};
+
+                                      // Iterate over the business list and add matching member IDs to the Set
+                                      business.forEach((item) {
+                                        final memberId = item['member_id']?.toString().toLowerCase() ?? '';
+                                        if (memberId.startsWith(pattern.toLowerCase())) {
+                                          distinctMemberIds.add(item['member_id'].toString());
+                                        }
+                                      });
+
+                                      // Convert the Set back to a List and return it
+                                      return distinctMemberIds.toList();
+                                    },
+
+                                    itemBuilder: (context, suggestion) {
+                                      return ListTile(
+                                        title: Text(suggestion),
+                                      );
+                                    },
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return "* Required Member ID";
+                                      } else {
+                                        return null;
+                                      }
+                                    },
+                                    onSuggestionSelected: (suggestion) async {
+                                      setState(() {
+                                        memberID.text = suggestion;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: 10,),
+                                SizedBox(
+                                  width: 170, height: 35,
+                                  child: TypeAheadFormField<String>(
+                                    textFieldConfiguration: TextFieldConfiguration(
+                                      controller: mobile ,
+                                      decoration: const InputDecoration(
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                        labelText: "Mobile",
+                                        labelStyle: TextStyle(fontSize: 14),
+                                      ),
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                    suggestionsCallback: (pattern) async {
+                                      return business
+                                          .where((item) =>
+                                          (item['mobile']?.toString().toLowerCase() ?? '')
+                                              .startsWith(pattern.toLowerCase()))
+                                          .map((item) => item['mobile'].toString())
+                                          .toList();
+                                    },
+                                    itemBuilder: (context, suggestion) {
+                                      return ListTile(
+                                        title: Text(suggestion),
+                                      );
+                                    },
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return "* Required Mobile";
+                                      } else {
+                                        return null;
+                                      }
+                                    },
+                                    onSuggestionSelected: (suggestion) async {
+                                      setState(() {
+                                        mobile.text = suggestion;
+                                      });
+                                    },
+                                  ),
+                                ),
                               ],
                             ),
                             Align(
@@ -269,88 +359,7 @@ class _MembersReportPageState extends State<MembersReportPage> {
                                   children: [
                                     Row(
                                       children: [
-                                        SizedBox(width: 10,),
-                                        SizedBox(
-                                          width: 170, height: 35,
-                                          child: TypeAheadFormField<String>(
-                                            textFieldConfiguration: TextFieldConfiguration(
-                                              controller: memberID,
-                                              decoration: const InputDecoration(
-                                                fillColor: Colors.white,
-                                                filled: true,
-                                                labelText: "Member ID",
-                                                labelStyle: TextStyle(fontSize: 14),
-                                              ),
-                                              style: TextStyle(fontSize: 14),
-                                            ),
-                                            suggestionsCallback: (pattern) async {
-                                              return business
-                                                  .where((item) =>
-                                                  (item['member_id']?.toString().toLowerCase() ?? '')
-                                                      .startsWith(pattern.toLowerCase()))
-                                                  .map((item) => item['member_id'].toString())
-                                                  .toList();
-                                            },
-                                            itemBuilder: (context, suggestion) {
-                                              return ListTile(
-                                                title: Text(suggestion),
-                                              );
-                                            },
-                                            validator: (value) {
-                                              if (value!.isEmpty) {
-                                                return "* Required Member ID";
-                                              } else {
-                                                return null;
-                                              }
-                                            },
-                                            onSuggestionSelected: (suggestion) async {
-                                              setState(() {
-                                                memberID.text = suggestion;
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                        SizedBox(width: 10,),
-                                        SizedBox(
-                                          width: 170, height: 35,
-                                          child: TypeAheadFormField<String>(
-                                            textFieldConfiguration: TextFieldConfiguration(
-                                              controller: mobile ,
-                                              decoration: const InputDecoration(
-                                                fillColor: Colors.white,
-                                                filled: true,
-                                                labelText: "Mobile",
-                                                labelStyle: TextStyle(fontSize: 14),
-                                              ),
-                                              style: TextStyle(fontSize: 14),
-                                            ),
-                                            suggestionsCallback: (pattern) async {
-                                              return business
-                                                  .where((item) =>
-                                                  (item['mobile']?.toString().toLowerCase() ?? '')
-                                                      .startsWith(pattern.toLowerCase()))
-                                                  .map((item) => item['mobile'].toString())
-                                                  .toList();
-                                            },
-                                            itemBuilder: (context, suggestion) {
-                                              return ListTile(
-                                                title: Text(suggestion),
-                                              );
-                                            },
-                                            validator: (value) {
-                                              if (value!.isEmpty) {
-                                                return "* Required Mobile";
-                                              } else {
-                                                return null;
-                                              }
-                                            },
-                                            onSuggestionSelected: (suggestion) async {
-                                              setState(() {
-                                                mobile.text = suggestion;
-                                              });
-                                            },
-                                          ),
-                                        ),
+
                                         SizedBox(width: 10,),
                                         SizedBox(
                                           width: 170,
@@ -470,7 +479,7 @@ class _MembersReportPageState extends State<MembersReportPage> {
                                             },
                                           ),
                                         ),
-
+                                        SizedBox(width: 10,),
                                         Card(
                                           child: IconButton(
                                             icon: Icon(Icons.search),
@@ -478,40 +487,35 @@ class _MembersReportPageState extends State<MembersReportPage> {
                                               filterData();
                                             },
                                           ),
-                                        )
+                                        ),
+                                        Card(
+                                          child: IconButton(
+                                              icon: Icon(Icons.picture_as_pdf),
+                                              onPressed: () =>
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => PdfViewScreen(
+                                                        data: filteredBusiness,
+                                                        generatePDF: generatePDF,
+                                                      ),
+                                                    ),
+                                                  )
+                                          ),
+                                        ),
+                                        Card(
+                                          child: IconButton(
+                                            icon: Icon(Icons.download),
+                                            onPressed: downloadPdf,
+                                          ),
+                                        ),
                                       ],
                                     )
                                   ],
                                 ),
                               ),
                             ),
-                            SizedBox(height: 15,),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Card(
-                                  child: IconButton(
-                                      icon: Icon(Icons.picture_as_pdf),
-                                      onPressed: () =>
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => PdfViewScreen(
-                                                data: filteredBusiness,
-                                                generatePDF: generatePDF,
-                                              ),
-                                            ),
-                                          )
-                                  ),
-                                ),
-                                Card(
-                                  child: IconButton(
-                                    icon: Icon(Icons.download),
-                                    onPressed: downloadPdf,
-                                  ),
-                                ),
-                              ],
-                            )
+
 
                           ],
                         ),

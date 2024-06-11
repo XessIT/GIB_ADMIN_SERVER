@@ -257,6 +257,10 @@ class _OverallReportAttState extends State<OverallReportAtt> {
                               IconButton(onPressed: (){
                                 Navigator.push(context, MaterialPageRoute(builder: (context)=>OverallReportAtt()));
                               }, icon: Icon(Icons.refresh)),
+                              IconButton(onPressed: (){
+                                Navigator.pop(context);
+                                //Navigator.push(context, MaterialPageRoute(builder: (context)=>OverallReportAtt()));
+                              }, icon: Icon(Icons.arrow_back)),
                             ],
                           ),
                           Align(
