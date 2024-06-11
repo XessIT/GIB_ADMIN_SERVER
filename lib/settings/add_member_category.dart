@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../../main.dart';
+
 
 class MemberCategory extends StatelessWidget {
   const MemberCategory({Key? key}) : super(key: key);
@@ -28,6 +30,7 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
   String? selectedChapter;
   String? selectedmember;
   TextEditingController membercategorycontroller = TextEditingController();
+  ScrollController _scrollController=ScrollController();
   TextEditingController editteam = TextEditingController();
   String name = "";
   TextEditingController districtController = TextEditingController();
@@ -36,10 +39,12 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
 
   ///district code
   List<Map<String, dynamic>> suggesstiondata = [];
+
   List district = [];
+
   Future<void> getDistrict() async {
     try {
-      final url = Uri.parse('http://localhost/GIB/lib/GIBAPI/district.php');
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/district.php');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -57,10 +62,12 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
   }
   /// chapter code
   List<String> chapters = [];
+
   List<Map<String, dynamic>> suggesstiondataitemName = [];
+
   Future<void> getChapter(String district) async {
     try {
-      final url = Uri.parse('http://localhost/GIB/lib/GIBAPI/chapter.php?district=$district'); // Fix URL
+      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/chapter.php?district=$district'); // Fix URL
       print(url);
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -84,8 +91,11 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
       print(' chapter Error: $error');
     }
   }
+
   List<Map<String, dynamic>> membersuggesstiondata = [];
+
   List member = [];
+
   Future<void> getMemberType() async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/member_type.php');
@@ -104,6 +114,7 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
       //  print('Error: $error');
     }
   }
+
   Future<void> addMemberCategory() async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_category.php');
@@ -131,7 +142,9 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
       // Handle error as needed
     }
   }
+
   List<Map<String, dynamic>> data=[];
+
   Future<void> getData() async {
     print('Attempting to make HTTP request...');
     try {
@@ -159,6 +172,7 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
       throw e; // rethrow the error if needed
     }
   }
+
   Future<void> editCategory(int id) async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_category.php');
@@ -174,6 +188,7 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
       if (response.statusCode == 200) {
         print("Response Status: ${response.statusCode}");
         print("Response Body: ${response.body}");
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>MemberCategory()));
         // Navigator.push(context, MaterialPageRoute(builder: (context) => const NewMemberApproval()));
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Successfully Edited")));
       } else {
@@ -184,12 +199,14 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
       // Handle error as needed
     }
   }
+
   Future<void> delete(String id) async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_category.php?id=$id');
       final response = await http.delete(url);
       print("Delete Url: $url");
       if (response.statusCode == 200) {
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>MemberCategory()));
         // Success handling, e.g., show a success message
       }
       else {
@@ -350,6 +367,7 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
                         const SizedBox(height: 10,width: 40,),
                         SizedBox(
                           width: 300,
+                          height: 50,
                           child: TextFormField(
                             controller: membercategorycontroller,
                             validator: (value){
@@ -378,8 +396,38 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
                                 content: Text('Member Category is Successfully Added')));
                           }
                         },
-                        child: const Text("Submit")),
+                        child: const Text("ADD")),
                     const SizedBox(height: 20,),
+                    Scrollbar(
+                      thumbVisibility: true,
+                      controller: _scrollController,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        controller: _scrollController,
+                        child: SizedBox(
+                          width: 1000,
+                          child: PaginatedDataTable(
+                            columnSpacing: 50,
+                            rowsPerPage: 15,
+                            columns: const [
+                              DataColumn(label: Center(child: Text("S.No", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("District", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("Chapter", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("Member Type", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("Member Category", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("Edit", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("Delete", style: TextStyle(fontWeight: FontWeight.bold)))),
+                            ],
+                            source: MyDataTableSource4(
+                              data: data,
+                              editCategory: editCategory, // Pass the unblocked function here
+                              delete: delete, // Pass the unblocked function here
+                              context: context,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                       Container(
                               child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
@@ -452,7 +500,8 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
                                                     }, icon: const Icon(Icons.delete,color: Colors.red,)))),
                                                 // 5 chapter
                                                 TableCell(child:Center(
-                                                    child:IconButton(
+                                                    child:
+                                                    IconButton(
                                                         onPressed: (){
                                                           showDialog<void>(
                                                             context: context,
@@ -505,7 +554,8 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
                                                             },
                                                           );
                                                         },
-                                                        icon: Icon(Icons.edit_note,color: Colors.blue,)))),
+                                                        icon: Icon(Icons.edit_note,color: Colors.blue,))
+                                                )),
                                               ]
                                           ),
                                         ]]   )
@@ -522,85 +572,141 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
   }
 }
 //Dialogue  button
+class MyDataTableSource4 extends DataTableSource {
+  List<Map<String, dynamic>> data;
+  BuildContext context;
+  final Future<void> Function(int id) editCategory;
+  final Future<void> Function(String id) delete;
 
-void _showDialog(BuildContext context) {
-  showDialog<void>(
-    context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        backgroundColor: Colors.black,
-        title: Text('Delete',style: Theme.of(context).textTheme.headlineMedium,),
-        content: Text('Are you sure do you want delete this?',style: Theme.of(context).textTheme.headlineMedium),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                child: Text('cancel',style: Theme.of(context).textTheme.headlineMedium,),
-                onPressed: () {
-                  Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text.substring(0, 1).toUpperCase() + text.substring(1);
+  }
+
+  MyDataTableSource4({required this.data,
+    required this.editCategory,
+    required this.delete,
+    required this.context});
+
+  @override
+  int get rowCount => data.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+  TextEditingController editteam=TextEditingController();
+  @override
+  DataRow getRow(int index) {
+    return DataRow(
+      cells: [
+        DataCell(Text('${index + 1}')),
+        DataCell(Text('${data[index]["district"]}')),
+        DataCell(Text('${data[index]["chapter"]}')),
+        DataCell(Text('${data[index]["member_type"]}')),
+        DataCell(Text('${data[index]["member_category"]}')),
+        DataCell(
+            IconButton(
+                onPressed: (){
+                  showDialog<void>(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return AlertDialog(
+                        backgroundColor: Colors.white,
+                        title: const Text('Edit',),
+                        content:  SizedBox(width: 300,
+                          child: TextFormField(
+                            controller: editteam = TextEditingController(
+                                text: data[index]["member_category"]
+                            ),
+                            validator: (value){
+                              if(value!.isEmpty){
+                                return " * Enter the category";
+                              }
+                              else{
+                                return null;
+                              }
+                            },
+                            decoration: InputDecoration(
+                                suffixIcon: IconButton(onPressed: (){
+                                  editteam.clear();
+                                }, icon: const Icon(Icons.cancel_presentation,color: Colors.red,))
+                            ) ,
+                          ),
+                        ),
+                        actions: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                child: const Text('Ok',),
+                                onPressed: () {
+                                  editCategory(int.parse(data[index]["id"]));
+                                  Navigator.pop(context); // Dismiss alert dialog
+                                },
+                              ),
+                              TextButton(
+                                child:  const Text('Cancel',),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  // Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
-              ),
-              TextButton(
-                child:  Text('delete',style: Theme.of(context).textTheme.headlineMedium,),
-                onPressed: () {
-
-                  // Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                },
-              ),
-            ],
-          ),
-        ],
-      );
-    },
-  );
-}
-
-void _editnote(BuildContext context, String teamname) {
-  showDialog<void>(
-    context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text('Edit',),
-        content:  SizedBox(width: 300,
-          child: TextFormField(
-            validator: (value){
-              if(value!.isEmpty){
-                return "enter the field";
-              }else{
-                return null;
-              }
-            },
-            decoration: InputDecoration(
-                suffixIcon: IconButton(onPressed: (){}, icon: Icon(Icons.cancel_presentation,color: Colors.red,))
-            ) ,
-          ),
+                icon: Icon(Icons.edit_note,color: Colors.blue,))
         ),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                child: const Text('Ok',),
-                onPressed: () {
-                  Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                },
-              ),
-              TextButton(
-                child:  const Text('Cancel',),
-                onPressed: () {
-                  // Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                },
-              ),
-            ],
-          ),
+        DataCell(
+          IconButton(
+              onPressed: (){
+                showDialog(
+                    context: context,
+                    builder: (ctx) =>
+                    // Dialog box for register meeting and add guest
+                    AlertDialog(
+                      backgroundColor: Colors.grey[800],
+                      title: const Text('Delete',
+                          style: TextStyle(color: Colors.white)),
+                      content: const Text("Do you want to Delete the role?",
+                          style: TextStyle(color: Colors.white)),
+                      actions: [
+                        TextButton(
+                            onPressed: () async{
+                              delete(data[index]['id']);
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                  content: Text("You have Successfully Deleted a Role")));
+                            },
+                            child: const Text('Yes')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('No'))
+                      ],
+                    )
+                );
+              },
+              icon: const Icon(Icons.delete,color: Colors.red,)),
 
-        ],
-      );
-    },
-  );
+        ),
+
+      ],
+    );
+  }
+
+  @override
+  void rowsRefresh() {
+    // handle data refresh
+  }
 }
+
 
 
 
