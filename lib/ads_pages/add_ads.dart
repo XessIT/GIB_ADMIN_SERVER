@@ -291,6 +291,7 @@ class _AddAdsPageState extends State<AddAdsPage> {
                                   }
                                   List<String> suggestions = membernamesuggesstion
                                       .where((item) {
+
                                     String firstName = item['first_name']
                                         ?.toString()
                                         .toLowerCase() ??

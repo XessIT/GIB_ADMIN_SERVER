@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -28,12 +29,14 @@ class ListAdsPage extends StatefulWidget {
 class _ListAdsPageState extends State<ListAdsPage> {
   final _formKey = GlobalKey<FormState>();
   List<Map<String, dynamic>> data = [];
+  int _rowsPerPage = 10;
+  int _currentPage = 0;
 
   Future<void> getData() async {
     print('Attempting to fetch data...');
     try {
       final url =
-          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php?table=ads');
+      Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php?table=ads');
       print('Request URL: $url');
       final response = await http.get(url);
       print("ResponseStatus: ${response.statusCode}");
@@ -85,6 +88,13 @@ class _ListAdsPageState extends State<ListAdsPage> {
     }
   }
 
+  List<Map<String, dynamic>> getPaginatedData() {
+    final int startIndex = _currentPage * _rowsPerPage;
+    final int endIndex = startIndex + _rowsPerPage;
+    return data.sublist(
+        startIndex, endIndex > data.length ? data.length : endIndex);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -120,43 +130,64 @@ class _ListAdsPageState extends State<ListAdsPage> {
                               DataColumn(
                                 label: Text(
                                   "Ad's",
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
                                 ),
                               ),
                               DataColumn(
                                 label: Text(
                                   "Member Name",
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
                                 ),
                               ),
                               DataColumn(
                                 label: Text(
                                   "Member Type",
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
                                 ),
                               ),
                               DataColumn(
                                 label: Text(
                                   "From Date",
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
                                 ),
                               ),
                               DataColumn(
                                 label: Text(
                                   "To Date",
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
                                 ),
                               ),
                               DataColumn(
                                 label: Text(
                                   "Price",
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
                                 ),
                               ),
                               DataColumn(
                                 label: Text(
                                   "Action",
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
                                 ),
                               ),
                             ],
@@ -170,45 +201,58 @@ class _ListAdsPageState extends State<ListAdsPage> {
                                     DataCell(
                                       Column(
                                         children: [
-
                                           TextButton(
                                             onPressed: () {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                  builder: (context) => AddImageView(
-                                                    membername: item['member_name'],
-                                                    memberId: item['id'],
-                                                  ),
+                                                  builder: (context) =>
+                                                      AddImageView(
+                                                        membername: item['member_name'],
+                                                        memberId: item['id'],
+                                                      ),
                                                 ),
                                               );
                                             },
                                             child: Text(
                                               "View",
-                                              style: TextStyle(color: Colors.green),
+                                              style: TextStyle(
+                                                  color: Colors.green),
                                             ),
                                           ),
-
                                         ],
                                       ),
                                     ),
                                     DataCell(
                                       Center(
-                                        child: Text(item['member_name'].toString(),style: Theme.of(context).textTheme.bodySmall),
+                                        child: Text(
+                                            item['member_name'].toString(),
+                                            style: Theme
+                                                .of(context)
+                                                .textTheme
+                                                .bodySmall),
                                       ),
                                     ),
                                     DataCell(
                                       Center(
-                                        child: Text(item['member_type'] ?? '',style: Theme.of(context).textTheme.bodySmall),
+                                        child: Text(item['member_type'] ?? '',
+                                            style: Theme
+                                                .of(context)
+                                                .textTheme
+                                                .bodySmall),
                                       ),
                                     ),
                                     DataCell(
                                       Center(
                                         child: Text(
                                           DateFormat('dd/MM/yyyy').format(
-                                            DateTime.parse(item['from_date'] ?? ''),
+                                            DateTime.parse(
+                                                item['from_date'] ?? ''),
                                           ),
-                                            style: Theme.of(context).textTheme.bodySmall
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .bodySmall,
                                         ),
                                       ),
                                     ),
@@ -216,50 +260,77 @@ class _ListAdsPageState extends State<ListAdsPage> {
                                       Center(
                                         child: Text(
                                           DateFormat('dd/MM/yyyy').format(
-                                            DateTime.parse(item['to_date'] ?? ''),
+                                            DateTime.parse(
+                                                item['to_date'] ?? ''),
                                           ),
-                                            style: Theme.of(context).textTheme.bodySmall
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .bodySmall,
                                         ),
                                       ),
                                     ),
                                     DataCell(
                                       Center(
-                                        child: Text(item['price'] ?? '',style: Theme.of(context).textTheme.bodySmall),
+                                        child: Text(
+                                            item['price'] ?? '', style: Theme
+                                            .of(context)
+                                            .textTheme
+                                            .bodySmall),
                                       ),
                                     ),
                                     DataCell(
                                       Center(
                                         child: IconButton(
-                                            icon: const Icon(Icons.delete,color: Colors.red,),
-                                            onPressed: () {
-                                              showDialog(
-                                                  context: context,
-                                                  builder: (ctx) =>
-                                                  // Dialog box for register meeting and add guest
+                                          icon: const Icon(
+                                              Icons.delete, color: Colors.red),
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (ctx) =>
                                                   AlertDialog(
-                                                    backgroundColor: Colors.grey[800],
+                                                    backgroundColor: Colors
+                                                        .grey[800],
                                                     title: const Text('Delete',
-                                                        style: TextStyle(color: Colors.white)),
-                                                    content: const Text("Do you want to Delete the Subscription Details?",
-                                                        style: TextStyle(color: Colors.white)),
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .white)),
+                                                    content: const Text(
+                                                        "Do you want to Delete the Subscription Details?",
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .white)),
                                                     actions: [
                                                       TextButton(
-                                                          onPressed: () async{
-                                                            delete(item["id"]);
-                                                            Navigator.push(context, MaterialPageRoute(builder: (context)=>const ListAds()));
-                                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                                                content: Text("Successfully Deleted ")));
-                                                          },
-                                                          child: const Text('Yes')),
+                                                        onPressed: () async {
+                                                          delete(item["id"]);
+                                                          Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                  builder: (
+                                                                      context) => const ListAds()));
+                                                          ScaffoldMessenger.of(
+                                                              context)
+                                                              .showSnackBar(
+                                                              const SnackBar(
+                                                                content: Text(
+                                                                    "Successfully Deleted "),
+                                                              ));
+                                                        },
+                                                        child: const Text(
+                                                            'Yes'),
+                                                      ),
                                                       TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(context);
-                                                          },
-                                                          child: const Text('No'))
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        child: const Text('No'),
+                                                      )
                                                     ],
-                                                  )
-                                              );
-                                            }
+                                                  ),
+                                            );
+                                          },
                                         ),
                                       ),
                                     ),
@@ -273,27 +344,28 @@ class _ListAdsPageState extends State<ListAdsPage> {
                   ),
                 ),
               ),
-
             ],
           ),
         ),
       ),
     );
   }
-}
 
-Future<void> delete(String getID) async {
-  try {
-    final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php?id=$getID');
-    print('member_category_url :$url');
-    final response = await http.delete(url);
-    if (response.statusCode == 200) {
-      print("Cat-status code :${response.statusCode}");
-      print("Cat-response body :${response.body}");
-    } else {
-      print('Error: ${response.statusCode}');
+
+  Future<void> delete(String getID) async {
+    try {
+      final url = Uri.parse(
+          'http://mybudgetbook.in/GIBADMINAPI/ads.php?id=$getID');
+      print('member_category_url :$url');
+      final response = await http.delete(url);
+      if (response.statusCode == 200) {
+        print("Cat-status code :${response.statusCode}");
+        print("Cat-response body :${response.body}");
+      } else {
+        print('Error: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
     }
-  } catch (error) {
-    print('Error: $error');
   }
 }
