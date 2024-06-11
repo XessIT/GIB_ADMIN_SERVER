@@ -93,8 +93,7 @@ class _AddAdsPageState extends State<AddAdsPage> {
       final DateTime parsedToDate = DateFormat('dd/MM/yyyy').parse(todate.text);
       final formattedToDate = DateFormat('yyyy/MM/dd').format(parsedToDate);
 
-      final url =
-          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php');
+      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php');
       final response = await http.post(
         url,
         headers: {
@@ -278,7 +277,7 @@ class _AddAdsPageState extends State<AddAdsPage> {
                     alignment: Alignment.center,
                     child: Row(
                       children: [
-                        SizedBox(width: 300),
+                        SizedBox(width: 20),
                         Container(
                           width: 200,
                           height: 40,
