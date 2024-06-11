@@ -34,8 +34,8 @@ class _CurrentMeetingUserRegistrationPageState
   }
 
   Future<List<Meeting>> fetchMeetings() async {
-    final response = await http.get(
-        Uri.parse('http://mybudgetbook.in/GIBADMINAPI/create_meeting.php'));
+    final response = await http
+        .get(Uri.parse('http://mybudgetbook.in/GIBADMINAPI/todaymeeting.php'));
 
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
@@ -355,7 +355,7 @@ class _GuestListPageState extends State<GuestListPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No Registration found'));
+            return Center(child: Text('No Guest found'));
           } else {
             return SingleChildScrollView(
               child: Center(
