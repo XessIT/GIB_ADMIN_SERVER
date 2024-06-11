@@ -507,7 +507,7 @@ class _VideoAddState extends State<VideoAdd> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(child: SizedBox(
-                  height: 50,
+                 // height: 50,
                   child:  TextFormField(
                     controller: dateController,
                     readOnly: true, // Make it read-only to prevent manual input
@@ -534,7 +534,8 @@ class _VideoAddState extends State<VideoAdd> {
 
                 )),
                 SizedBox(width: 20,),
-                Expanded(child: SizedBox(height: 50,
+                Expanded(child: SizedBox(
+                  //height: 50,
                   child: TextFormField(
                     controller: eventNameController,
                     decoration: InputDecoration(

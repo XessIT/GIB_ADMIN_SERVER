@@ -509,13 +509,13 @@ class _MyScaffoldState extends State<MyScaffold> {
           //Create Meeting
           AdminMenuItem(title: 'Create Meeting', route: '/create_meeting'),
           //Upcoming Meeting
-          AdminMenuItem(
-              title: 'Upcoming Meeting', route: "/upcomingmeeting_page"),
+          // AdminMenuItem(
+          //     title: 'Upcoming Meeting', route: "/upcomingmeeting_page"),
           //Meeting History
           AdminMenuItem(
               title: 'Meeting History', route: "/meeting_history_page"),
           //QR Creations
-          AdminMenuItem(title: 'QR Creations', route: "/qr_creations_page"),
+          AdminMenuItem(title: 'Upcoming Meeting', route: "/qr_creations_page"),
           //Current Meeting User Registration
           AdminMenuItem(
               title: 'Current Meeting User Registration',
@@ -543,8 +543,8 @@ class _MyScaffoldState extends State<MyScaffold> {
           AdminMenuItem(title: 'Add Member Type', route: '/add_member_type'),
           AdminMenuItem(
               title: 'Add Member Category', route: '/add_member_category'),
-          AdminMenuItem(title: 'About ', route: "aboutGib"),
-          AdminMenuItem(title: 'About Edit', route: "/EditAbout"),
+          // AdminMenuItem(title: 'About ', route: "aboutGib"),
+          // AdminMenuItem(title: 'About Edit', route: "/EditAbout"),
         ]),
     //Gallery
     const AdminMenuItem(title: 'Gallery', icon: Icons.photo_album, children: [

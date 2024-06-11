@@ -173,32 +173,6 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
     }
   }
 
-  Future<void> editCategory(int id) async {
-    try {
-      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_category.php');
-      print(url);
-      print("Member Type: ${editteam.text}");
-      final response = await http.put(
-        url,
-        body: jsonEncode({
-          "member_category": editteam.text,
-          "id": id,
-        }),
-      );
-      if (response.statusCode == 200) {
-        print("Response Status: ${response.statusCode}");
-        print("Response Body: ${response.body}");
-        Navigator.push(context, MaterialPageRoute(builder: (context)=>MemberCategory()));
-        // Navigator.push(context, MaterialPageRoute(builder: (context) => const NewMemberApproval()));
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Successfully Edited")));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed to Edit")));
-      }
-    } catch (e) {
-      print("Error during signup: $e");
-      // Handle error as needed
-    }
-  }
 
   Future<void> delete(String id) async {
     try {
@@ -420,7 +394,6 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
                             ],
                             source: MyDataTableSource4(
                               data: data,
-                              editCategory: editCategory, // Pass the unblocked function here
                               delete: delete, // Pass the unblocked function here
                               context: context,
                             ),
@@ -428,139 +401,7 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
                         ),
                       ),
                     ),
-                      Container(
-                              child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Table(
-                                      border: TableBorder.all(),
-                                      defaultColumnWidth:const FixedColumnWidth(200.0),
-                                      columnWidths: const <int, TableColumnWidth>{
-                                      },
-                                      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                      // s.no
-                                      children: [TableRow(children:[TableCell(child:  Center(child: Text('District', style: Theme.of(context).textTheme.headlineMedium),),),
-                                        //Name
-                                        TableCell(child:Center(child: Text('Chapter',style: Theme.of(context).textTheme.headlineMedium,),)),
-                                        // company name
 
-                                        TableCell(child:Center(child: Text('Member Type',style: Theme.of(context).textTheme.headlineMedium,),)),
-
-                                        TableCell(child:Center(child: Text('Member Category',style: Theme.of(context).textTheme.headlineMedium,),)),
-                                        //Email
-                                        TableCell(child:Center(child: Column(children: [SizedBox(height: 8,), Text('Detele', style: Theme.of(context).textTheme.headlineMedium,), SizedBox(height: 8,),],),)),
-                                        // Chapter
-                                        TableCell(child: Center(child: Text('Edit', style: Theme.of(context).textTheme.headlineMedium,),))]),
-
-                                        for(var i = 0 ;i < data.length; i++) ...[
-                                          TableRow(
-                                              decoration: BoxDecoration(color: Colors.grey[200]),
-                                              children:[
-                                                // 1 Table row contents
-                                                TableCell(child:Center(child: Column(
-                                                  children: [const SizedBox(height: 8,),
-                                                    Text('${data[i]["district"]}',),
-                                                    const SizedBox(height: 8,),],),)),
-                                                //2 name
-                                                TableCell(child: Center(child: Text('${data[i]["chapter"]}',),)),
-                                                // 3 company name
-                                                TableCell(child:Center(child: Text('${data[i]["member_type"]}',),)),
-                                                // 4 email
-                                                TableCell(child:Center(child: Text('${data[i]["member_category"]}',),)),
-
-                                                TableCell(child: Center(child:
-                                                IconButton(
-                                                    onPressed: (){
-                                                      showDialog(
-                                                          context: context,
-                                                          builder: (ctx) =>
-                                                          // Dialog box for register meeting and add guest
-                                                          AlertDialog(
-                                                            backgroundColor: Colors.grey[800],
-                                                            title: const Text('Delete',
-                                                                style: TextStyle(color: Colors.white)),
-                                                            content: const Text("Do you want to Delete the Image?",
-                                                                style: TextStyle(color: Colors.white)),
-                                                            actions: [
-                                                              TextButton(
-                                                                  onPressed: () async{
-                                                                    delete(data[i]['id']);
-                                                                    Navigator.pop(context);
-                                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                                                        content: Text("You have Successfully Deleted a Member Category")));
-                                                                  },
-                                                                  child: const Text('Yes')),
-                                                              TextButton(
-                                                                  onPressed: () {
-                                                                    Navigator.pop(context);
-                                                                  },
-                                                                  child: const Text('No'))
-                                                            ],
-                                                          )
-                                                      );
-                                                    }, icon: const Icon(Icons.delete,color: Colors.red,)))),
-                                                // 5 chapter
-                                                TableCell(child:Center(
-                                                    child:
-                                                    IconButton(
-                                                        onPressed: (){
-                                                          showDialog<void>(
-                                                            context: context,
-                                                            builder: (BuildContext dialogContext) {
-                                                              return AlertDialog(
-                                                                backgroundColor: Colors.white,
-                                                                title: const Text('Edit',),
-                                                                content:  SizedBox(width: 300,
-                                                                  child: TextFormField(
-                                                                    controller: editteam = TextEditingController(
-                                                                        text: data[i]["member_category"]
-                                                                    ),
-                                                                    validator: (value){
-                                                                      if(value!.isEmpty){
-                                                                        return "Enter the field";
-                                                                      }else{
-                                                                        return null;
-                                                                      }
-                                                                    },
-                                                                    decoration: InputDecoration(
-                                                                        suffixIcon: IconButton(onPressed: (){
-                                                                          editteam.clear();
-                                                                        }, icon: const Icon(Icons.cancel_presentation,color: Colors.red,))
-                                                                    ) ,
-                                                                  ),
-                                                                ),
-                                                                actions: <Widget>[
-                                                                  Row(
-                                                                    mainAxisAlignment: MainAxisAlignment.end,
-                                                                    children: [
-                                                                      TextButton(
-                                                                        child: const Text('Ok',),
-                                                                        onPressed: () {
-                                                                          editCategory(int.parse(data[i]["id"]));
-                                                                          Navigator.pop(context); // Dismiss alert dialog
-                                                                        },
-                                                                      ),
-                                                                      TextButton(
-                                                                        child:  const Text('Cancel',),
-                                                                        onPressed: () {
-                                                                          Navigator.pop(context);
-                                                                          // Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                                                                        },
-                                                                      ),
-                                                                    ],
-                                                                  ),
-
-                                                                ],
-                                                              );
-                                                            },
-                                                          );
-                                                        },
-                                                        icon: Icon(Icons.edit_note,color: Colors.blue,))
-                                                )),
-                                              ]
-                                          ),
-                                        ]]   )
-                              )
-                          )
                   ],
                 ),
               ),
@@ -575,7 +416,6 @@ class _MemberCategoryPageState extends State<MemberCategoryPage> {
 class MyDataTableSource4 extends DataTableSource {
   List<Map<String, dynamic>> data;
   BuildContext context;
-  final Future<void> Function(int id) editCategory;
   final Future<void> Function(String id) delete;
 
   String capitalizeFirstLetter(String text) {
@@ -584,7 +424,6 @@ class MyDataTableSource4 extends DataTableSource {
   }
 
   MyDataTableSource4({required this.data,
-    required this.editCategory,
     required this.delete,
     required this.context});
 
@@ -593,6 +432,32 @@ class MyDataTableSource4 extends DataTableSource {
 
   @override
   bool get isRowCountApproximate => false;
+  Future<void> editCategory(int id) async {
+    try {
+      final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/add_member_category.php');
+      print(url);
+      print("Member Type: ${editteam.text}");
+      final response = await http.put(
+        url,
+        body: jsonEncode({
+          "member_category": editteam.text,
+          "id": id,
+        }),
+      );
+      if (response.statusCode == 200) {
+        print("Response Status: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>MemberCategory()));
+        // Navigator.push(context, MaterialPageRoute(builder: (context) => const NewMemberApproval()));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Successfully Edited")));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed to Edit")));
+      }
+    } catch (e) {
+      print("Error during signup: $e");
+      // Handle error as needed
+    }
+  }
 
   @override
   int get selectedRowCount => 0;

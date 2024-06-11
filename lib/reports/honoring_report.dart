@@ -890,6 +890,52 @@ class _HonoringMemberWiseState extends State<HonoringMemberWise> {
                               },
                               icon: Icon(Icons.refresh),
                             ),
+                            SizedBox(width: 10),
+                            SizedBox(
+                              width: 170,
+                              height: 35,
+                              child: TypeAheadFormField<String>(
+                                textFieldConfiguration: TextFieldConfiguration(
+                                  controller: nameController,
+                                  decoration: const InputDecoration(
+                                    fillColor: Colors.white,
+                                    filled: true,
+                                    labelText: "Name or Mobile",
+                                    labelStyle: TextStyle(fontSize: 14),
+                                  ),
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                suggestionsCallback: (pattern) async {
+                                  if (pattern.isEmpty) {
+                                    return []; // Return an empty list if the pattern is empty
+                                  }
+                                  else {
+                                    return business.where((item) =>
+                                    (item['name']?.toString().toLowerCase().contains(pattern.toLowerCase()) ?? false) ||
+                                        (item['mobile']?.toString().toLowerCase().contains(pattern.toLowerCase()) ?? false))
+                                        .map((item) => "${item['name']}")
+                                        .toList();
+                                  }
+                                },
+                                itemBuilder: (context, suggestion) {
+                                  return ListTile(
+                                    title: Text(suggestion,style: TextStyle(fontSize: 12),),
+                                  );
+                                },
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "* Required Name or Mobile";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                                onSuggestionSelected: (suggestion) async {
+                                  setState(() {
+                                    nameController.text = suggestion;
+                                  });
+                                },
+                              ),
+                            ),
                           ],
                         ),
                         Align(
@@ -900,52 +946,7 @@ class _HonoringMemberWiseState extends State<HonoringMemberWise> {
                               children: [
                                 Row(
                                   children: [
-                                    SizedBox(width: 10),
-                                    SizedBox(
-                                      width: 170,
-                                      height: 35,
-                                      child: TypeAheadFormField<String>(
-                                        textFieldConfiguration: TextFieldConfiguration(
-                                          controller: nameController,
-                                          decoration: const InputDecoration(
-                                            fillColor: Colors.white,
-                                            filled: true,
-                                            labelText: "Name or Mobile",
-                                            labelStyle: TextStyle(fontSize: 14),
-                                          ),
-                                          style: TextStyle(fontSize: 14),
-                                        ),
-                                        suggestionsCallback: (pattern) async {
-                                          if (pattern.isEmpty) {
-                                            return []; // Return an empty list if the pattern is empty
-                                          }
-                                          else {
-                                            return business.where((item) =>
-                                            (item['name']?.toString().toLowerCase().contains(pattern.toLowerCase()) ?? false) ||
-                                                (item['mobile']?.toString().toLowerCase().contains(pattern.toLowerCase()) ?? false))
-                                                .map((item) => "${item['name']}")
-                                                .toList();
-                                          }
-                                        },
-                                        itemBuilder: (context, suggestion) {
-                                          return ListTile(
-                                            title: Text(suggestion,style: TextStyle(fontSize: 12),),
-                                          );
-                                        },
-                                        validator: (value) {
-                                          if (value!.isEmpty) {
-                                            return "* Required Name or Mobile";
-                                          } else {
-                                            return null;
-                                          }
-                                        },
-                                        onSuggestionSelected: (suggestion) async {
-                                          setState(() {
-                                            nameController.text = suggestion;
-                                          });
-                                        },
-                                      ),
-                                    ),
+
                                     SizedBox(width: 10),
 
                                     SizedBox(
@@ -1083,7 +1084,27 @@ class _HonoringMemberWiseState extends State<HonoringMemberWise> {
                                       ),
                                     ),
                                     SizedBox(width: 10),
-
+                                    Card(
+                                      child: IconButton(
+                                          icon: Icon(Icons.picture_as_pdf),
+                                          onPressed: () =>
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => PdfViewScreen(
+                                                    data: filteredBusiness,
+                                                    generatePDF: generatePDF,
+                                                  ),
+                                                ),
+                                              )
+                                      ),
+                                    ),
+                                    Card(
+                                      child: IconButton(
+                                        icon: Icon(Icons.download),
+                                        onPressed: downloadPdf,
+                                      ),
+                                    ),
 
 
                                   ],
@@ -1093,33 +1114,7 @@ class _HonoringMemberWiseState extends State<HonoringMemberWise> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Card(
-                        child: IconButton(
-                          icon: Icon(Icons.picture_as_pdf),
-                          onPressed: () =>
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PdfViewScreen(
-                                    data: filteredBusiness,
-                                    generatePDF: generatePDF,
-                                  ),
-                                ),
-                              )
-                        ),
-                      ),
-                      Card(
-                        child: IconButton(
-                          icon: Icon(Icons.download),
-                          onPressed: downloadPdf,
-                        ),
-                      ),
-                    ],
-                  )
+
                       ],
                     ),
                   ),

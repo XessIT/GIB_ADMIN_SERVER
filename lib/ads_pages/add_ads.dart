@@ -22,15 +22,20 @@ final TextEditingController membernameController = TextEditingController();
 
 class _AddAdsPageState extends State<AddAdsPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController membernameController = TextEditingController();
+  final TextEditingController fromDate = TextEditingController();
+  final TextEditingController todate = TextEditingController();
+  final TextEditingController pricecontroller = TextEditingController();
+
   String? type = "";
   bool executive = false;
   bool nonexecutive = false;
   bool guest = false;
-  List<bool> checkboxStatus = [];
-  String selectedMemberId = '';
   List<Uint8List> selectedImages = [];
   List<String> imageNames = [];
   List<String> imageDatas = [];
+  String selectedMemberId = '';
+  List<Map<String, dynamic>> membernamesuggesstion = [];
 
   Future<void> getImages() async {
     final html.FileUploadInputElement input = html.FileUploadInputElement();
@@ -54,9 +59,6 @@ class _AddAdsPageState extends State<AddAdsPage> {
     });
   }
 
-  // Member name code
-  List<Map<String, dynamic>> membernamesuggesstion = [];
-  List member = [];
   Future<void> getMemberName() async {
     try {
       final url = Uri.parse(
@@ -76,25 +78,31 @@ class _AddAdsPageState extends State<AddAdsPage> {
     }
   }
 
-  // Method to count selected member types
-  int countSelectedMemberTypes() {
-    int count = 0;
-    if (executive) count++;
-    if (nonexecutive) count++;
-    if (guest) count++;
-    return count;
+  String getSelectedMemberTypes() {
+    List<String> selectedTypes = [];
+    if (executive) selectedTypes.add('Executive');
+    if (nonexecutive) selectedTypes.add('NonExecutive');
+    if (guest) selectedTypes.add('Guest');
+    return selectedTypes.join(',');
+  }
+
+  @override
+  void initState() {
+    getMemberName();
+
+    super.initState();
   }
 
   Future<void> addAds() async {
     try {
       final DateTime parsedFromDate =
-          DateFormat('dd/MM/yyyy').parse(fromDate.text);
+      DateFormat('dd/MM/yyyy').parse(fromDate.text);
       final formattedFromDate = DateFormat('yyyy/MM/dd').format(parsedFromDate);
       final DateTime parsedToDate = DateFormat('dd/MM/yyyy').parse(todate.text);
       final formattedToDate = DateFormat('yyyy/MM/dd').format(parsedToDate);
 
       final url =
-          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php');
+      Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php');
       final response = await http.post(
         url,
         headers: {
@@ -108,8 +116,7 @@ class _AddAdsPageState extends State<AddAdsPage> {
           "from_date": formattedFromDate,
           "to_date": formattedToDate,
           "price": pricecontroller.text,
-          "selected_member_types":
-              getSelectedMemberTypes(), // Include count of selected member types
+          "selected_member_types": getSelectedMemberTypes(), // Include count of selected member types
         }),
       );
 
@@ -140,21 +147,6 @@ class _AddAdsPageState extends State<AddAdsPage> {
     } catch (e) {
       print("Error during adding ads: $e");
     }
-  }
-
-  String getSelectedMemberTypes() {
-    List<String> selectedTypes = [];
-    if (executive) selectedTypes.add('Executive');
-    if (nonexecutive) selectedTypes.add('NonExecutive');
-    if (guest) selectedTypes.add('Guest');
-    return selectedTypes
-        .join(','); // Send comma-separated list of selected types
-  }
-
-  @override
-  void initState() {
-    getMemberName();
-    super.initState();
   }
 
   @override
@@ -253,7 +245,7 @@ class _AddAdsPageState extends State<AddAdsPage> {
                       ElevatedButton(
                         style: ButtonStyle(
                           backgroundColor:
-                              MaterialStateProperty.all(Colors.white),
+                          MaterialStateProperty.all(Colors.white),
                         ),
                         onPressed: () {
                           getImages();
@@ -267,9 +259,9 @@ class _AddAdsPageState extends State<AddAdsPage> {
                       selectedImages.isEmpty
                           ? Text("No File Chosen")
                           : Column(
-                              children:
-                                  imageNames.map((name) => Text(name)).toList(),
-                            ),
+                        children:
+                        imageNames.map((name) => Text(name)).toList(),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 60),
@@ -278,70 +270,82 @@ class _AddAdsPageState extends State<AddAdsPage> {
                     alignment: Alignment.center,
                     child: Row(
                       children: [
-                        SizedBox(width: 300),
-                        Container(
-                          width: 200,
-                          height: 40,
-                          child: TypeAheadFormField<String>(
-                            textFieldConfiguration: TextFieldConfiguration(
-                              controller: membernameController,
-                              decoration: const InputDecoration(
-                                  fillColor: Colors.white,
-                                  filled: true,
-                                  labelText: "Member Name"),
-                            ),
-                            suggestionsCallback: (pattern) async {
-                              if (pattern.isEmpty) {
-                                return [];
-                              }
-                              List<String> suggestions = membernamesuggesstion
-                                  .where((item) {
+                        SizedBox(width: 50),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 200,
+
+                              child: TypeAheadFormField<String>(
+                                textFieldConfiguration: TextFieldConfiguration(
+                                  controller: membernameController,
+                                  decoration: const InputDecoration(
+                                      fillColor: Colors.white,
+                                      filled: true,
+                                      labelText: "Member Name"),
+                                ),
+                                suggestionsCallback: (pattern) async {
+                                  if (pattern.isEmpty) {
+                                    return [];
+                                  }
+                                  List<String> suggestions = membernamesuggesstion
+                                      .where((item) {
                                     String firstName = item['first_name']
-                                            ?.toString()
-                                            .toLowerCase() ??
+                                        ?.toString()
+                                        .toLowerCase() ??
                                         '';
                                     String lastName = item['last_name']
-                                            ?.toString()
-                                            .toLowerCase() ??
+                                        ?.toString()
+                                        .toLowerCase() ??
                                         '';
                                     return firstName
-                                            .contains(pattern.toLowerCase()) ||
+                                        .contains(pattern.toLowerCase()) ||
                                         lastName
                                             .contains(pattern.toLowerCase());
                                   })
-                                  .map<String>((item) =>
-                                      '${item['first_name']} ${item['last_name']}')
-                                  .toSet()
-                                  .toList();
-                              return suggestions;
-                            },
-                            itemBuilder: (context, suggestion) {
-                              return ListTile(
-                                title: Text(suggestion),
-                              );
-                            },
-                            onSuggestionSelected: (suggestion) async {
-                              var selectedMember =
+                                      .map<String>((item) =>
+                                  '${item['first_name']} ${item['last_name']}')
+                                      .toSet()
+                                      .toList();
+                                  return suggestions;
+                                },
+                                itemBuilder: (context, suggestion) {
+                                  return ListTile(
+                                    title: Text(suggestion),
+                                  );
+                                },
+                                onSuggestionSelected: (suggestion) async {
+                                  var selectedMember =
                                   membernamesuggesstion.firstWhere(
-                                (item) =>
+                                        (item) =>
                                     '${item['first_name']} ${item['last_name']}' ==
-                                    suggestion,
-                              );
-                              if (selectedMember != null &&
-                                  selectedMember['id'] != null) {
-                                setState(() {
-                                  selectedMemberId =
-                                      selectedMember['member_id'].toString();
-                                  membernameController.text = suggestion;
-                                });
-                              }
-                            },
+                                        suggestion,
+                                  );
+                                  if (selectedMember != null &&
+                                      selectedMember['id'] != null) {
+                                    setState(() {
+                                      selectedMemberId =
+                                          selectedMember['member_id'].toString();
+                                      membernameController.text = suggestion;
+                                    });
+                                  }
+                                },
+                                validator: (value) {
+                                  if (value!.isEmpty || selectedMemberId.isEmpty) {
+                                    return "*Enter a valid Member Name";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                              ),
+                            ),
                           ),
                         ),
                         SizedBox(width: 20),
                         SizedBox(
                           width: 200,
-                          height: 40,
+                       //   height: 40,
                           child: TextFormField(
                             controller: fromDate,
                             onTap: () async {
@@ -374,7 +378,7 @@ class _AddAdsPageState extends State<AddAdsPage> {
                         SizedBox(width: 20),
                         SizedBox(
                           width: 200,
-                          height: 40,
+                         // height: 40,
                           child: TextFormField(
                             controller: todate,
                             readOnly: true,
@@ -408,11 +412,18 @@ class _AddAdsPageState extends State<AddAdsPage> {
                         SizedBox(width: 20),
                         SizedBox(
                           width: 200,
-                          height: 40,
+                          //height: 40,
                           child: TextFormField(
                             controller: pricecontroller,
                             decoration:
-                                const InputDecoration(labelText: "Price"),
+                            const InputDecoration(labelText: "Price"),
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return "*Enter the Price";
+                              } else {
+                                return null;
+                              }
+                            },
                           ),
                         ),
                       ],
@@ -427,7 +438,18 @@ class _AddAdsPageState extends State<AddAdsPage> {
                           elevation: 10,
                           shadowColor: Colors.pinkAccent,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          _formKey.currentState!.reset();
+                          setState(() {
+                            selectedImages.clear();
+                            imageNames.clear();
+                            imageDatas.clear();
+                            executive = false;
+                            nonexecutive = false;
+                            guest = false;
+                            selectedMemberId = '';
+                          });
+                        },
                         child: const Text("Reset"),
                       ),
                       SizedBox(width: 20),
@@ -437,7 +459,26 @@ class _AddAdsPageState extends State<AddAdsPage> {
                           shadowColor: Colors.pinkAccent,
                         ),
                         onPressed: () {
-                          if (_formKey.currentState!.validate()) {
+                          if (!executive && !nonexecutive && !guest) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    "Please select Member Type"),
+                              ),
+                            );
+                          }
+                          if (selectedImages.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    "Please select Images"),
+                              ),
+                            );
+                          }
+                          if (!_formKey.currentState!.validate()) {
+                            return;
+                          }
+                          else {
                             addAds();
                           }
                         },
