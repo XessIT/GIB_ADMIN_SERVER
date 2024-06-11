@@ -261,7 +261,7 @@ class _TeamCreationspageState extends State<TeamCreationspage> {
                         Expanded(
                           child: SizedBox(
                             width: 250,
-                            height: 50,
+
                             child: TypeAheadFormField<String>(
                               textFieldConfiguration: TextFieldConfiguration(
                                 controller: districtController,

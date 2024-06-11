@@ -389,25 +389,28 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                         return null;
                                       }
                                     },
+                                    onTap: () async {
+                                      DateTime? pickDate =
+                                          await showDatePicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime(1900),
+                                          lastDate: DateTime(2100));
+                                      if (pickDate == null) return;
+                                      {
+                                        setState(() {
+                                          _meetingdate.text =
+                                              DateFormat('dd/MM/yyyy')
+                                                  .format(pickDate);
+                                        });
+                                      }
+                                    },
                                     //pickDate From Date
                                     decoration: InputDecoration(
                                       labelText: " Meeting Date  ",
                                       suffixIcon: IconButton(
                                         onPressed: () async {
-                                          DateTime? pickDate =
-                                          await showDatePicker(
-                                              context: context,
-                                              initialDate: DateTime.now(),
-                                              firstDate: DateTime(1900),
-                                              lastDate: DateTime(2100));
-                                          if (pickDate == null) return;
-                                          {
-                                            setState(() {
-                                              _meetingdate.text =
-                                                  DateFormat('dd/MM/yyyy')
-                                                      .format(pickDate);
-                                            });
-                                          }
+
                                         },
                                         icon: const Icon(
                                             Icons.calendar_today_outlined),
@@ -431,6 +434,28 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       return null;
                                     }
                                   },
+                                  onTap: () async {
+                                    TimeOfDay? fromnewTime =
+                                    await showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.now());
+                                    //if 'cancel =null'
+                                    if (fromnewTime == null) return;
+                                    DateTime fromparsedTime = DateTime(
+                                      DateTime.now().year,
+                                      DateTime.now().month,
+                                      DateTime.now().day,
+                                      fromnewTime.hour,
+                                      fromnewTime.minute,
+                                    );
+                                    String fromformattedTime =
+                                    DateFormat('hh:mm a')
+                                        .format(fromparsedTime);
+                                    //if 'ok = Timeofday
+                                    setState(() {
+                                      fromtime.text = fromformattedTime;
+                                    });
+                                  },
                                   readOnly: true,
                                   //pickDate From Date
                                   decoration: InputDecoration(
@@ -438,26 +463,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                     //  icon:Icon( Icons.timer),
                                     suffixIcon: IconButton(
                                       onPressed: () async {
-                                        TimeOfDay? fromnewTime =
-                                        await showTimePicker(
-                                            context: context,
-                                            initialTime: TimeOfDay.now());
-                                        //if 'cancel =null'
-                                        if (fromnewTime == null) return;
-                                        DateTime fromparsedTime = DateTime(
-                                          DateTime.now().year,
-                                          DateTime.now().month,
-                                          DateTime.now().day,
-                                          fromnewTime.hour,
-                                          fromnewTime.minute,
-                                        );
-                                        String fromformattedTime =
-                                        DateFormat('hh:mm a')
-                                            .format(fromparsedTime);
-                                        //if 'ok = Timeofday
-                                        setState(() {
-                                          fromtime.text = fromformattedTime;
-                                        });
+
                                       },
                                       icon: const Icon(
                                           Icons.watch_later_outlined),
@@ -482,6 +488,28 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       return null;
                                     }
                                   },
+                                  onTap: () async {
+                                    TimeOfDay? tonewTime =
+                                    await showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.now());
+                                    //if 'cancel =null'
+                                    if (tonewTime == null) return;
+                                    DateTime toparsedTime = DateTime(
+                                      DateTime.now().year,
+                                      DateTime.now().month,
+                                      DateTime.now().day,
+                                      tonewTime.hour,
+                                      tonewTime.minute,
+                                    );
+                                    String toformattedTime =
+                                    DateFormat('hh:mm a')
+                                        .format(toparsedTime);
+                                    //if 'ok = Timeofday
+                                    setState(() {
+                                      totime.text = toformattedTime;
+                                    });
+                                  },
                                   readOnly: true,
                                   //pickDate From Date
                                   decoration: InputDecoration(
@@ -489,26 +517,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                     //  icon:Icon( Icons.timer),
                                     suffixIcon: IconButton(
                                       onPressed: () async {
-                                        TimeOfDay? tonewTime =
-                                        await showTimePicker(
-                                            context: context,
-                                            initialTime: TimeOfDay.now());
-                                        //if 'cancel =null'
-                                        if (tonewTime == null) return;
-                                        DateTime toparsedTime = DateTime(
-                                          DateTime.now().year,
-                                          DateTime.now().month,
-                                          DateTime.now().day,
-                                          tonewTime.hour,
-                                          tonewTime.minute,
-                                        );
-                                        String toformattedTime =
-                                        DateFormat('hh:mm a')
-                                            .format(toparsedTime);
-                                        //if 'ok = Timeofday
-                                        setState(() {
-                                          totime.text = toformattedTime;
-                                        });
+
                                       },
                                       icon: const Icon(
                                           Icons.watch_later_outlined),
@@ -601,18 +610,27 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   decoration: const InputDecoration(
                                       fillColor: Colors.white,
                                       filled: true,
-                                      labelText: "Meeting Type"),
+                                      labelText: "Meeting Type"
+                                  ),
                                 ),
                                 suggestionsCallback: (pattern) async {
-                                  return meetingsuggesstion
-                                      .where((item) => (item['meeting_type']
-                                      ?.toString()
-                                      .toLowerCase() ??
-                                      '')
-                                      .startsWith(pattern.toLowerCase()))
-                                      .map((item) =>
-                                      item['meeting_type'].toString())
-                                      .toList();
+                                  if (_selectedMemberTypes.isEmpty) {
+                                    return [];
+                                  }
+                                  // Filter meetings based on selected member type
+                                  List<String> filteredMeetings = [];
+                                  if (_selectedMemberTypes.contains('Non-Executive')) {
+                                    // If Non-Executive is selected, show only Training Program
+                                    filteredMeetings.add('Training Program');
+                                  } else {
+                                    // Otherwise, show all meetings
+                                    filteredMeetings = meetingsuggesstion
+                                        .where((item) => (item['meeting_type']?.toString().toLowerCase() ?? '')
+                                        .startsWith(pattern.toLowerCase()))
+                                        .map((item) => item['meeting_type'].toString())
+                                        .toList();
+                                  }
+                                  return filteredMeetings;
                                 },
                                 validator: (value) {
                                   if (value!.isEmpty) {
@@ -635,6 +653,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                             ),
                           ),
                         ),
+
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -1013,26 +1032,29 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       return null;
                                     }
                                   },
+                                  onTap: () async {
+                                    DateTime? pickDate =
+                                        await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime(1900),
+                                        lastDate: DateTime(2100));
+                                    if (pickDate == null) return;
+                                    {
+                                      setState(() {
+                                        _registrationopeningdate.text =
+                                            DateFormat('dd/MM/yyyy')
+                                                .format(pickDate);
+                                      });
+                                    }
+                                  },
                                   //pickDate scheduledate
                                   decoration: InputDecoration(
                                     label: const Text(
                                         " Registration Opening Date"),
                                     suffixIcon: IconButton(
                                       onPressed: () async {
-                                        DateTime? pickDate =
-                                        await showDatePicker(
-                                            context: context,
-                                            initialDate: DateTime.now(),
-                                            firstDate: DateTime(1900),
-                                            lastDate: DateTime(2100));
-                                        if (pickDate == null) return;
-                                        {
-                                          setState(() {
-                                            _registrationopeningdate.text =
-                                                DateFormat('dd/MM/yyyy')
-                                                    .format(pickDate);
-                                          });
-                                        }
+
                                       },
                                       icon: const Icon(
                                           Icons.calendar_today_outlined),
@@ -1043,7 +1065,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                           ),
                         ),
 
-                        Expanded(
+                       /* Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: SizedBox(
@@ -1095,7 +1117,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                               ),
                             ),
                           ),
-                        ),
+                        ),*/
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -1110,25 +1132,28 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       return null;
                                     }
                                   },
+                                  onTap: () async{
+                                    DateTime? pickDate =
+                                        await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime(1900),
+                                        lastDate: DateTime(2100));
+                                    if (pickDate == null) return;
+                                    {
+                                      setState(() {
+                                        _registrationclosingdate.text =
+                                            DateFormat('dd/MM/yyyy')
+                                                .format(pickDate);
+                                      });
+                                    }
+                                  },
                                   //pickDate From Date
                                   decoration: InputDecoration(
                                     labelText: "Registration Closing Date",
                                     suffixIcon: IconButton(
                                       onPressed: () async {
-                                        DateTime? pickDate =
-                                        await showDatePicker(
-                                            context: context,
-                                            initialDate: DateTime.now(),
-                                            firstDate: DateTime(1900),
-                                            lastDate: DateTime(2100));
-                                        if (pickDate == null) return;
-                                        {
-                                          setState(() {
-                                            _registrationclosingdate.text =
-                                                DateFormat('dd/MM/yyyy')
-                                                    .format(pickDate);
-                                          });
-                                        }
+
                                       },
                                       icon: const Icon(
                                           Icons.calendar_today_outlined),
@@ -1142,10 +1167,61 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                         /// regesitration closing date
                       ],
                     ),
-                    Row(
+                  /*  Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 300,
+                              child: TextFormField(
+                                readOnly: true,
+                                controller: registrationclosingtime,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "* Required Closing Time";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                                //pickDate Closing Time
+                                decoration: InputDecoration(
+                                  label: const Text("Closing Time"),
+                                  //  icon:Icon( Icons.timer),
+                                  suffixIcon: IconButton(
+                                    onPressed: () async {
+                                      TimeOfDay? closingnewTime =
+                                      await showTimePicker(
+                                          context: context,
+                                          initialTime: TimeOfDay.now());
+                                      //if 'cancel =null'
+                                      if (closingnewTime == null) return;
+                                      DateTime closingparsedTime = DateTime(
+                                        DateTime.now().year,
+                                        DateTime.now().month,
+                                        DateTime.now().day,
+                                        closingnewTime.hour,
+                                        closingnewTime.minute,
+                                      );
+                                      String closingformattedTime =
+                                      DateFormat('hh:mm a')
+                                          .format(closingparsedTime);
+                                      //if 'ok = Timeofday
+                                      setState(() {
+                                        registrationclosingtime.text =
+                                            closingformattedTime;
+                                      });
+                                    },
+                                    icon:
+                                    const Icon(Icons.watch_later_outlined),
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
 
                         /// regestiration closing time
                         Expanded(
@@ -1165,7 +1241,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                           ),
                         ),
                       ],
-                    ),
+                    ),*/
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
