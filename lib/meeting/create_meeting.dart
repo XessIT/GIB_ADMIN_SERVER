@@ -991,55 +991,55 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Expanded(
-                    child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
-                  width: 300,
-                  child: TextFormField(
-                    readOnly: true,
-                    controller: _registrationopeningdate,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return "* Required Registration Opening Date";
-                      } else {
-                        return null;
-                      }
-                    },
-                    onTap: () async {
-                      DateTime? meetingDate;
-                      if (_meetingdate.text.isNotEmpty) {
-                        meetingDate = DateFormat('dd/MM/yyyy')
-                            .parse(_meetingdate.text);
-                      }
-                      DateTime? pickDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: meetingDate ?? DateTime(2100),
-                      );
-                      if (pickDate == null) return;
-                      setState(() {
-                        _registrationopeningdate.text =
-                            DateFormat('dd/MM/yyyy')
-                                .format(pickDate);
-                      });
-                    },
-                    decoration: InputDecoration(
-                      label:
-                      const Text("Registration Opening Date"),
-                      suffixIcon: IconButton(
-                        onPressed: () async {},
-                        icon: const Icon(
-                            Icons.calendar_today_outlined),
-                        color: Colors.green,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 300,
+                              child: TextFormField(
+                                readOnly: true,
+                                controller: _registrationopeningdate,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "* Required Registration Opening Date";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                                onTap: () async {
+                                  DateTime? meetingDate;
+                                  if (_meetingdate.text.isNotEmpty) {
+                                    meetingDate = DateFormat('dd/MM/yyyy')
+                                        .parse(_meetingdate.text);
+                                  }
+                                  DateTime? pickDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: meetingDate ?? DateTime(2100),
+                                  );
+                                  if (pickDate == null) return;
+                                  setState(() {
+                                    _registrationopeningdate.text =
+                                        DateFormat('dd/MM/yyyy')
+                                            .format(pickDate);
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  label:
+                                  const Text("Registration Opening Date"),
+                                  suffixIcon: IconButton(
+                                    onPressed: () async {},
+                                    icon: const Icon(
+                                        Icons.calendar_today_outlined),
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
 
-                       /* Expanded(
+                        /* Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: SizedBox(
@@ -1143,7 +1143,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                         /// regesitration closing date
                       ],
                     ),
-                  /*  Row(
+                    /*  Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Expanded(
