@@ -106,7 +106,6 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   TextEditingController meetingController = TextEditingController();
   TextEditingController memberController = TextEditingController();
   Set<String> _selectedMemberTypes = Set<String>();
-  Set<String> selectedchapter = Set<String>();
   DateTime? fromTimeParsed;
 
   String? _selectedMemberType = ""; // Change the type to String?
@@ -291,7 +290,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
           "from_time": fromtime.text,
           "to_time": totime.text,
           "district": districtController.text,
-          "chapter": selectedchapter.toList(),
+          "chapter": chapterController.text,
           "meeting_type": meetingController.text,
           "member_type": _selectedMemberTypes.toList(),
           "team_name": teamNamesString, // Corrected line
@@ -341,13 +340,10 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
 
   /// gowtham done 16/05/2024
   void _updateTextField() {
-    // Concatenate selected member types and chapters into single strings
-    String concatenatedMemberTypes = _selectedMemberTypes.join(', ');
-    String concatenatedChapters = selectedchapter.join(', ');
-
-    // Update text fields with concatenated strings
-    memberController.text = concatenatedMemberTypes;
-    chapterController.text = concatenatedChapters;
+    // Concatenate selected member types into a single string
+    String concatenatedTypes = _selectedMemberTypes.join(', ');
+    // Update text field with concatenated string
+    memberController.text = concatenatedTypes;
   }
 
   @override
@@ -405,9 +401,11 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   onTap: () async {
                                     DateTime? pickDate = await showDatePicker(
                                       context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime
-                                          .now(), // Set firstDate to current date
+                                      initialDate:
+                                          DateTime.now().add(Duration(days: 1)),
+                                      firstDate: DateTime.now().add(Duration(
+                                          days:
+                                              1)), // Set firstDate to one day after current date
                                       lastDate: DateTime(2100),
                                     );
                                     if (pickDate == null) return;
@@ -775,65 +773,51 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
 
                         /// District
                         Expanded(
-                            child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            width: 300,
-                            child: TypeAheadFormField<String>(
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: chapterController,
-                                decoration: InputDecoration(
-                                  labelText: 'Chapter',
-                                  filled: true,
-                                  fillColor: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 300,
+                              child: TypeAheadFormField<String>(
+                                textFieldConfiguration: TextFieldConfiguration(
+                                  controller: chapterController,
+                                  decoration: const InputDecoration(
+                                      fillColor: Colors.white,
+                                      filled: true,
+                                      labelText: "Chapter"),
                                 ),
-                              ),
-                              suggestionsCallback: (pattern) async {
-                                return suggesstiondataitemName
-                                    .map((item) => item['chapter'].toString())
-                                    .toList();
-                              },
-                              itemBuilder: (context, String suggestion) {
-                                return CheckboxListTile(
-                                  title: Text(suggestion),
-                                  value: selectedchapter.contains(suggestion),
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      if (value != null && value) {
-                                        selectedchapter.add(suggestion);
-                                        chapterController.text =
-                                            suggestion; // Update text field
-                                      } else {
-                                        selectedchapter.remove(suggestion);
-                                      }
-                                      _updateTextField(); // Update text field
-                                    });
-                                  },
-                                );
-                              },
-                              onSuggestionSelected: (String? suggestion) {
-                                setState(() {
-                                  if (suggestion != null) {
-                                    if (selectedchapter.contains(suggestion)) {
-                                      selectedchapter.remove(suggestion);
-                                    } else {
-                                      selectedchapter.add(suggestion);
-                                      chapterController.text =
-                                          suggestion; // Update text field
-                                    }
-                                    _updateTextField(); // Update text field
+                                suggestionsCallback: (pattern) async {
+                                  return suggesstiondataitemName
+                                      .where((item) => (item['chapter']
+                                                  ?.toString()
+                                                  .toLowerCase() ??
+                                              '')
+                                          .startsWith(pattern.toLowerCase()))
+                                      .map((item) => item['chapter'].toString())
+                                      .toList();
+                                },
+                                itemBuilder: (context, suggestion) {
+                                  return ListTile(
+                                    title: Text(suggestion),
+                                  );
+                                },
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "* Required Chapter";
+                                  } else {
+                                    return null;
                                   }
-                                });
-                              },
-                              validator: (value) {
-                                if (selectedchapter.isEmpty) {
-                                  return 'Select at least one member type';
-                                }
-                                return null;
-                              },
+                                },
+                                onSuggestionSelected: (suggestion) async {
+                                  setState(() {
+                                    chapterController.text = suggestion;
+                                    getTeamNames(districtController.text.trim(),
+                                        chapterController.text.trim());
+                                  });
+                                },
+                              ),
                             ),
                           ),
-                        )),
+                        ),
 
                         /// chapter
                         Expanded(
@@ -892,86 +876,95 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                         showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text("Select a Team Name"),
-                                              content: SingleChildScrollView(
-                                                child: Column(
-                                                  children: teamNames
-                                                      .map((String value) {
-                                                    return GestureDetector(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          // Toggle the selection state of the tapped item
-                                                          selectedValues[
-                                                                  value] =
-                                                              !(selectedValues[
-                                                                      value] ??
-                                                                  false);
-                                                        });
-                                                      },
-                                                      child: Container(
-                                                        color: selectedValues[
-                                                                    value] ??
-                                                                false
-                                                            ? Colors
-                                                                .green // Color for selected items
-                                                            : Colors
-                                                                .white, // Color for unselected items
-                                                        child: Padding(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  horizontal:
-                                                                      16.0,
-                                                                  vertical:
-                                                                      8.0),
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
-                                                            children: [
-                                                              Text(
-                                                                value,
-                                                                style: Theme.of(
-                                                                        context)
-                                                                    .textTheme
-                                                                    .headlineMedium!
-                                                                    .copyWith(),
+                                            // Use StatefulBuilder to manage local state within the dialog
+                                            return StatefulBuilder(
+                                              builder: (context, setState) {
+                                                return AlertDialog(
+                                                  title: Text(
+                                                      "Select a Team Name"),
+                                                  content:
+                                                      SingleChildScrollView(
+                                                    child: Column(
+                                                      children: teamNames
+                                                          .map((String value) {
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            setState(() {
+                                                              selectedValues[
+                                                                      value] =
+                                                                  !(selectedValues[
+                                                                          value] ??
+                                                                      false);
+                                                            });
+                                                          },
+                                                          child: Container(
+                                                            color: selectedValues[
+                                                                        value] ??
+                                                                    false
+                                                                ? Colors
+                                                                    .blueGrey
+                                                                : Colors.white,
+                                                            child: Padding(
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      horizontal:
+                                                                          16.0,
+                                                                      vertical:
+                                                                          8.0),
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Text(
+                                                                    value,
+                                                                    style: Theme.of(
+                                                                            context)
+                                                                        .textTheme
+                                                                        .headlineMedium!
+                                                                        .copyWith(),
+                                                                  ),
+                                                                  if (selectedValues[
+                                                                          value] ??
+                                                                      false)
+                                                                    Icon(
+                                                                        Icons
+                                                                            .check,
+                                                                        color: Colors
+                                                                            .white),
+                                                                ],
                                                               ),
-                                                              if (selectedValues[
-                                                                      value] ??
-                                                                  false)
-                                                                Icon(
-                                                                    Icons.check,
-                                                                    color: Colors
-                                                                        .white),
-                                                            ],
+                                                            ),
                                                           ),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                    setState(() {
-                                                      // Update the selected items list
-                                                      selectedItems =
-                                                          selectedValues.entries
-                                                              .where(
-                                                                  (entry) =>
+                                                        );
+                                                      }).toList(),
+                                                    ),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        // Update parent state when dialog is closed
+                                                        setState(() {
+                                                          selectedItems =
+                                                              selectedValues
+                                                                  .entries
+                                                                  .where((entry) =>
                                                                       entry
                                                                           .value)
-                                                              .map((entry) =>
-                                                                  entry.key)
-                                                              .toList();
-                                                    });
-                                                  },
-                                                  child: Text("Done"),
-                                                ),
-                                              ],
+                                                                  .map((entry) =>
+                                                                      entry.key)
+                                                                  .toList();
+                                                        });
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                        // Trigger a rebuild of the parent widget
+                                                        this.setState(() {});
+                                                      },
+                                                      child: Text("Done"),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
                                             );
                                           },
                                         );
@@ -1008,21 +1001,17 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        children: selectedValues.keys
-                                            .map((String value) {
-                                          if (selectedValues[value] ?? false) {
-                                            return Column(
-                                              children: [
-                                                Text(
-                                                  value,
-                                                  style: TextStyle(
-                                                      color: Colors.green),
-                                                ),
-                                              ],
-                                            );
-                                          } else {
-                                            return SizedBox.shrink();
-                                          }
+                                        children:
+                                            selectedItems.map((String value) {
+                                          return Column(
+                                            children: [
+                                              Text(
+                                                value,
+                                                style: TextStyle(
+                                                    color: Colors.green),
+                                              ),
+                                            ],
+                                          );
                                         }).toList(),
                                       ),
                                     ],
@@ -1164,43 +1153,52 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                             child: SizedBox(
                               width: 300,
                               child: TextFormField(
-                                  controller: _registrationclosingdate,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return "* Required Registration Closing Date";
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                  onTap: () async {
-                                    DateTime? meetingDate;
-                                    if (_meetingdate.text.isNotEmpty) {
-                                      meetingDate = DateFormat('dd/MM/yyyy')
-                                          .parse(_meetingdate.text);
-                                    }
-                                    DateTime? pickDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime.now(),
-                                      lastDate: meetingDate ?? DateTime(2100),
-                                    );
-                                    if (pickDate == null) return;
-                                    setState(() {
-                                      _registrationclosingdate.text =
-                                          DateFormat('dd/MM/yyyy')
-                                              .format(pickDate);
-                                    });
-                                  },
-                                  //pickDate From Date
-                                  decoration: InputDecoration(
-                                    labelText: "Registration Closing Date",
-                                    suffixIcon: IconButton(
-                                      onPressed: () async {},
-                                      icon: const Icon(
-                                          Icons.calendar_today_outlined),
-                                      color: Colors.green,
-                                    ),
-                                  )),
+                                controller: _registrationclosingdate,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "* Required Registration Closing Date";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                                onTap: () async {
+                                  DateTime? registrationOpeningDate;
+                                  DateTime? meetingDate;
+                                  if (_registrationopeningdate
+                                      .text.isNotEmpty) {
+                                    registrationOpeningDate =
+                                        DateFormat('dd/MM/yyyy').parse(
+                                            _registrationopeningdate.text);
+                                  }
+                                  if (_meetingdate.text.isNotEmpty) {
+                                    meetingDate = DateFormat('dd/MM/yyyy')
+                                        .parse(_meetingdate.text);
+                                  }
+                                  DateTime? pickDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: registrationOpeningDate ??
+                                        DateTime.now(),
+                                    firstDate: registrationOpeningDate ??
+                                        DateTime.now(),
+                                    lastDate: meetingDate ?? DateTime(2100),
+                                  );
+                                  if (pickDate == null) return;
+                                  setState(() {
+                                    _registrationclosingdate.text =
+                                        DateFormat('dd/MM/yyyy')
+                                            .format(pickDate);
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  labelText: "Registration Closing Date",
+                                  suffixIcon: IconButton(
+                                    onPressed: () async {},
+                                    icon: const Icon(
+                                        Icons.calendar_today_outlined),
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
