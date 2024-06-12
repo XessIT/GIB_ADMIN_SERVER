@@ -106,6 +106,8 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   TextEditingController meetingController = TextEditingController();
   TextEditingController memberController = TextEditingController();
   Set<String> _selectedMemberTypes = Set<String>();
+  DateTime? fromTimeParsed;
+
 
   String? _selectedMemberType = ""; // Change the type to String?
 
@@ -244,13 +246,21 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        setState(() {
-          teamNames = List<String>.from(responseData);
-        });
+
+        if (responseData is List<dynamic>) {
+          // Assuming the JSON structure is a list of team names
+          setState(() {
+            teamNames = (responseData as List<dynamic>).map((item) => item['team_name'] as String).toList();
+          });
+
+        } else {
+          print('Unexpected JSON structure: $responseData');
+        }
       } else {
         print('Error fetching team names: ${response.statusCode}');
       }
-    } catch (error) {
+    }
+    catch (error) {
       print('Error occurred during HTTP request: $error');
     }
   }
@@ -381,45 +391,39 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                               child: SizedBox(
                                 width: 300,
                                 child: TextFormField(
-                                    controller: _meetingdate,
-                                    validator: (value) {
-                                      if (value!.isEmpty) {
-                                        return "* Required Meeting Date";
-                                      } else {
-                                        return null;
-                                      }
-                                    },
-                                    onTap: () async {
-                                      DateTime? pickDate =
-                                          await showDatePicker(
-                                          context: context,
-                                          initialDate: DateTime.now(),
-                                          firstDate: DateTime(1900),
-                                          lastDate: DateTime(2100));
-                                      if (pickDate == null) return;
-                                      {
-                                        setState(() {
-                                          _meetingdate.text =
-                                              DateFormat('dd/MM/yyyy')
-                                                  .format(pickDate);
-                                        });
-                                      }
-                                    },
-                                    //pickDate From Date
-                                    decoration: InputDecoration(
-                                      labelText: " Meeting Date  ",
-                                      suffixIcon: IconButton(
-                                        onPressed: () async {
-
-                                        },
-                                        icon: const Icon(
-                                            Icons.calendar_today_outlined),
-                                        color: Colors.green,
-                                      ),
-                                    )),
+                                  controller: _meetingdate,
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return "* Required Meeting Date";
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  onTap: () async {
+                                    DateTime? pickDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: DateTime.now().add(Duration(days: 1)),
+                                      firstDate: DateTime.now().add(Duration(days: 1)), // Set firstDate to one day after current date
+                                      lastDate: DateTime(2100),
+                                    );
+                                    if (pickDate == null) return;
+                                    setState(() {
+                                      _meetingdate.text = DateFormat('dd/MM/yyyy').format(pickDate);
+                                    });
+                                  },
+                                  //pickDate From Date
+                                  decoration: InputDecoration(
+                                    labelText: " Meeting Date  ",
+                                    suffixIcon: IconButton(
+                                      onPressed: () async {},
+                                      icon: const Icon(Icons.calendar_today_outlined),
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          )        ,
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -436,37 +440,26 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   },
                                   onTap: () async {
                                     TimeOfDay? fromnewTime =
-                                    await showTimePicker(
-                                        context: context,
-                                        initialTime: TimeOfDay.now());
-                                    //if 'cancel =null'
+                                    await showTimePicker(context: context, initialTime: TimeOfDay.now());
                                     if (fromnewTime == null) return;
-                                    DateTime fromparsedTime = DateTime(
+                                    fromTimeParsed = DateTime(
                                       DateTime.now().year,
                                       DateTime.now().month,
                                       DateTime.now().day,
                                       fromnewTime.hour,
                                       fromnewTime.minute,
                                     );
-                                    String fromformattedTime =
-                                    DateFormat('hh:mm a')
-                                        .format(fromparsedTime);
-                                    //if 'ok = Timeofday
+                                    String fromformattedTime = DateFormat('hh:mm a').format(fromTimeParsed!);
                                     setState(() {
                                       fromtime.text = fromformattedTime;
                                     });
                                   },
                                   readOnly: true,
-                                  //pickDate From Date
                                   decoration: InputDecoration(
                                     labelText: "From Time",
-                                    //  icon:Icon( Icons.timer),
                                     suffixIcon: IconButton(
-                                      onPressed: () async {
-
-                                      },
-                                      icon: const Icon(
-                                          Icons.watch_later_outlined),
+                                      onPressed: () async {},
+                                      icon: const Icon(Icons.watch_later_outlined),
                                       color: Colors.green,
                                     ),
                                   ),
@@ -490,10 +483,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                   },
                                   onTap: () async {
                                     TimeOfDay? tonewTime =
-                                    await showTimePicker(
-                                        context: context,
-                                        initialTime: TimeOfDay.now());
-                                    //if 'cancel =null'
+                                    await showTimePicker(context: context, initialTime: TimeOfDay.now());
                                     if (tonewTime == null) return;
                                     DateTime toparsedTime = DateTime(
                                       DateTime.now().year,
@@ -502,25 +492,37 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                       tonewTime.hour,
                                       tonewTime.minute,
                                     );
-                                    String toformattedTime =
-                                    DateFormat('hh:mm a')
-                                        .format(toparsedTime);
-                                    //if 'ok = Timeofday
+                                    if (fromTimeParsed != null && toparsedTime.isBefore(fromTimeParsed!)) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text("Invalid To Time"),
+                                            content: Text("The 'To Time' cannot be earlier than the 'From Time'."),
+                                            actions: [
+                                              TextButton(
+                                                child: Text("OK"),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      return;
+                                    }
+                                    String toformattedTime = DateFormat('hh:mm a').format(toparsedTime);
                                     setState(() {
                                       totime.text = toformattedTime;
                                     });
                                   },
                                   readOnly: true,
-                                  //pickDate From Date
                                   decoration: InputDecoration(
                                     labelText: "To Time",
-                                    //  icon:Icon( Icons.timer),
                                     suffixIcon: IconButton(
-                                      onPressed: () async {
-
-                                      },
-                                      icon: const Icon(
-                                          Icons.watch_later_outlined),
+                                      onPressed: () async {},
+                                      icon: const Icon(Icons.watch_later_outlined),
                                       color: Colors.green,
                                     ),
                                   ),
@@ -787,8 +789,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                 onSuggestionSelected: (suggestion) async {
                                   setState(() {
                                     chapterController.text = suggestion;
-                                    getTeamNames(districtController.text.trim(),
-                                        chapterController.text.trim());
+                                    getTeamNames(districtController.text.trim(), chapterController.text.trim());
                                   });
                                 },
                               ),
@@ -853,102 +854,83 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                         showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text("Select a Team Name"),
-                                              content: SingleChildScrollView(
-                                                child: Column(
-                                                  children: teamNames
-                                                      .map((String value) {
-                                                    return GestureDetector(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          // Toggle the selection state of the tapped item
-                                                          selectedValues[
-                                                          value] =
-                                                          !(selectedValues[
-                                                          value] ??
-                                                              false);
-                                                        });
-                                                      },
-                                                      child: Container(
-                                                        color: selectedValues[
-                                                        value] ??
-                                                            false
-                                                            ? Colors
-                                                            .green // Color for selected items
-                                                            : Colors
-                                                            .white, // Color for unselected items
-                                                        child: Padding(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                              horizontal:
-                                                              16.0,
-                                                              vertical:
-                                                              8.0),
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                            children: [
-                                                              Text(
-                                                                value,
-                                                                style: Theme.of(
-                                                                    context)
-                                                                    .textTheme
-                                                                    .headlineMedium!
-                                                                    .copyWith(),
+                                            // Use StatefulBuilder to manage local state within the dialog
+                                            return StatefulBuilder(
+                                              builder: (context, setState) {
+                                                return AlertDialog(
+
+                                                  title: Text("Select a Team Name"),
+                                                  content: SingleChildScrollView(
+                                                    child: Column(
+                                                      children: teamNames.map((String value) {
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            setState(() {
+                                                              selectedValues[value] =
+                                                              !(selectedValues[value] ?? false);
+
+                                                            });
+                                                          },
+                                                          child: Container(
+                                                            color: selectedValues[value] ?? false
+                                                                ? Colors.blueGrey
+                                                                : Colors.white,
+                                                            child: Padding(
+                                                              padding: EdgeInsets.symmetric(
+                                                                  horizontal: 16.0, vertical: 8.0),
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                MainAxisAlignment.spaceBetween,
+                                                                children: [
+                                                                  Text(
+                                                                    value,
+                                                                    style: Theme.of(context)
+                                                                        .textTheme
+                                                                        .headlineMedium!
+                                                                        .copyWith(),
+                                                                  ),
+                                                                  if (selectedValues[value] ?? false)
+                                                                    Icon(Icons.check,
+                                                                        color: Colors.white),
+                                                                ],
                                                               ),
-                                                              if (selectedValues[
-                                                              value] ??
-                                                                  false)
-                                                                Icon(
-                                                                    Icons.check,
-                                                                    color: Colors
-                                                                        .white),
-                                                            ],
+                                                            ),
                                                           ),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                    setState(() {
-                                                      // Update the selected items list
-                                                      selectedItems =
-                                                          selectedValues.entries
-                                                              .where(
-                                                                  (entry) =>
-                                                              entry
-                                                                  .value)
-                                                              .map((entry) =>
-                                                          entry.key)
+                                                        );
+                                                      }).toList(),
+                                                    ),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        // Update parent state when dialog is closed
+                                                        setState(() {
+                                                          selectedItems = selectedValues.entries
+                                                              .where((entry) => entry.value)
+                                                              .map((entry) => entry.key)
                                                               .toList();
-                                                    });
-                                                  },
-                                                  child: Text("Done"),
-                                                ),
-                                              ],
+                                                        });
+                                                        Navigator.of(context).pop();
+                                                        // Trigger a rebuild of the parent widget
+                                                        this.setState(() {});
+                                                      },
+                                                      child: Text("Done"),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
                                             );
                                           },
                                         );
                                       },
                                       style: ButtonStyle(
-                                        backgroundColor:
-                                        MaterialStateProperty.all(
-                                            Colors.blue),
+                                        backgroundColor: MaterialStateProperty.all(Colors.blue),
                                       ),
                                       child: Container(
                                         child: Padding(
                                           padding: const EdgeInsets.all(10.0),
                                           child: Text("Select Team Name",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .displayMedium),
+                                              style: Theme.of(context).textTheme.displayMedium),
                                         ),
                                       ),
                                     ),
@@ -962,28 +944,19 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                                     children: [
                                       Text(
                                         "Selected Team Names",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
+                                        style: Theme.of(context).textTheme.bodySmall,
                                       ),
                                       Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children: selectedValues.keys
-                                            .map((String value) {
-                                          if (selectedValues[value] ?? false) {
-                                            return Column(
-                                              children: [
-                                                Text(
-                                                  value,
-                                                  style: TextStyle(
-                                                      color: Colors.green),
-                                                ),
-                                              ],
-                                            );
-                                          } else {
-                                            return SizedBox.shrink();
-                                          }
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: selectedItems.map((String value) {
+                                          return Column(
+                                            children: [
+                                              Text(
+                                                value,
+                                                style: TextStyle(color: Colors.green),
+                                              ),
+                                            ],
+                                          );
                                         }).toList(),
                                       ),
                                     ],
@@ -1018,52 +991,53 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SizedBox(
-                              width: 300,
-                              child: TextFormField(
-                                  readOnly: true,
-                                  controller: _registrationopeningdate,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return "* Required Registration Opening Date";
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                  onTap: () async {
-                                    DateTime? pickDate =
-                                        await showDatePicker(
-                                        context: context,
-                                        initialDate: DateTime.now(),
-                                        firstDate: DateTime(1900),
-                                        lastDate: DateTime(2100));
-                                    if (pickDate == null) return;
-                                    {
-                                      setState(() {
-                                        _registrationopeningdate.text =
-                                            DateFormat('dd/MM/yyyy')
-                                                .format(pickDate);
-                                      });
-                                    }
-                                  },
-                                  //pickDate scheduledate
-                                  decoration: InputDecoration(
-                                    label: const Text(
-                                        " Registration Opening Date"),
-                                    suffixIcon: IconButton(
-                                      onPressed: () async {
-
-                                      },
-                                      icon: const Icon(
-                                          Icons.calendar_today_outlined),
-                                      color: Colors.green,
-                                    ),
-                                  )),
-                            ),
-                          ),
-                        ),
+                    child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    readOnly: true,
+                    controller: _registrationopeningdate,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return "* Required Registration Opening Date";
+                      } else {
+                        return null;
+                      }
+                    },
+                    onTap: () async {
+                      DateTime? meetingDate;
+                      if (_meetingdate.text.isNotEmpty) {
+                        meetingDate = DateFormat('dd/MM/yyyy')
+                            .parse(_meetingdate.text);
+                      }
+                      DateTime? pickDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: meetingDate ?? DateTime(2100),
+                      );
+                      if (pickDate == null) return;
+                      setState(() {
+                        _registrationopeningdate.text =
+                            DateFormat('dd/MM/yyyy')
+                                .format(pickDate);
+                      });
+                    },
+                    decoration: InputDecoration(
+                      label:
+                      const Text("Registration Opening Date"),
+                      suffixIcon: IconButton(
+                        onPressed: () async {},
+                        icon: const Icon(
+                            Icons.calendar_today_outlined),
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
                        /* Expanded(
                           child: Padding(
@@ -1124,46 +1098,48 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                             child: SizedBox(
                               width: 300,
                               child: TextFormField(
-                                  controller: _registrationclosingdate,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return "* Required Registration Closing Date";
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                  onTap: () async{
-                                    DateTime? pickDate =
-                                        await showDatePicker(
-                                        context: context,
-                                        initialDate: DateTime.now(),
-                                        firstDate: DateTime(1900),
-                                        lastDate: DateTime(2100));
-                                    if (pickDate == null) return;
-                                    {
-                                      setState(() {
-                                        _registrationclosingdate.text =
-                                            DateFormat('dd/MM/yyyy')
-                                                .format(pickDate);
-                                      });
-                                    }
-                                  },
-                                  //pickDate From Date
-                                  decoration: InputDecoration(
-                                    labelText: "Registration Closing Date",
-                                    suffixIcon: IconButton(
-                                      onPressed: () async {
-
-                                      },
-                                      icon: const Icon(
-                                          Icons.calendar_today_outlined),
-                                      color: Colors.green,
-                                    ),
-                                  )),
+                                controller: _registrationclosingdate,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "* Required Registration Closing Date";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                                onTap: () async {
+                                  DateTime? registrationOpeningDate;
+                                  DateTime? meetingDate;
+                                  if (_registrationopeningdate.text.isNotEmpty) {
+                                    registrationOpeningDate = DateFormat('dd/MM/yyyy')
+                                        .parse(_registrationopeningdate.text);
+                                  }
+                                  if (_meetingdate.text.isNotEmpty) {
+                                    meetingDate = DateFormat('dd/MM/yyyy').parse(_meetingdate.text);
+                                  }
+                                  DateTime? pickDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: registrationOpeningDate ?? DateTime.now(),
+                                    firstDate: registrationOpeningDate ?? DateTime.now(),
+                                    lastDate: meetingDate ?? DateTime(2100),
+                                  );
+                                  if (pickDate == null) return;
+                                  setState(() {
+                                    _registrationclosingdate.text =
+                                        DateFormat('dd/MM/yyyy').format(pickDate);
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  labelText: "Registration Closing Date",
+                                  suffixIcon: IconButton(
+                                    onPressed: () async {},
+                                    icon: const Icon(Icons.calendar_today_outlined),
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-
                         /// regesitration closing date
                       ],
                     ),
