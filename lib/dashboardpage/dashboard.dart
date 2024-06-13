@@ -181,7 +181,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         setState(() {
-          honortotalRows = responseData['totalAmount'];
+          honortotalRows = responseData['totalAmount'] ?? "0";
         });
       } else {
         print('Error: ${response.statusCode}');

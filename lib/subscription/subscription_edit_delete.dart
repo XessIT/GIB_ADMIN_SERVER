@@ -52,6 +52,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       print('Error: $error');
     }
   }
+
   Future<void> subscriptionDelete(String getID) async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/subscription.php?id=$getID');
