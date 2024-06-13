@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -28,12 +29,14 @@ class ListAdsPage extends StatefulWidget {
 class _ListAdsPageState extends State<ListAdsPage> {
   final _formKey = GlobalKey<FormState>();
   List<Map<String, dynamic>> data = [];
+  int _rowsPerPage = 10;
+  int _currentPage = 0;
 
   Future<void> getData() async {
     print('Attempting to fetch data...');
     try {
       final url =
-          Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php?table=ads');
+      Uri.parse('http://mybudgetbook.in/GIBADMINAPI/ads.php?table=ads');
       print('Request URL: $url');
       final response = await http.get(url);
       print("ResponseStatus: ${response.statusCode}");
@@ -85,6 +88,13 @@ class _ListAdsPageState extends State<ListAdsPage> {
     }
   }
 
+  List<Map<String, dynamic>> getPaginatedData() {
+    final int startIndex = _currentPage * _rowsPerPage;
+    final int endIndex = startIndex + _rowsPerPage;
+    return data.sublist(
+        startIndex, endIndex > data.length ? data.length : endIndex);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -105,198 +115,222 @@ class _ListAdsPageState extends State<ListAdsPage> {
               ),
               Padding(
                 padding: const EdgeInsets.all(30.0),
-                child: Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      Container(
-                        child: SingleChildScrollView(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
-                          child: Table(
-                            border: TableBorder.all(),
-                            defaultColumnWidth: const FixedColumnWidth(150),
-                            columnWidths: const <int, TableColumnWidth>{
-                              0: FixedColumnWidth(150),
-                              1: FixedColumnWidth(200),
-                              2: FixedColumnWidth(240),
-                              5: FixedColumnWidth(180),
-                            },
-                            defaultVerticalAlignment:
-                                TableCellVerticalAlignment.middle,
-                            children: [
-                              TableRow(
-                                children: [
-                                  TableCell(
-                                    child: Center(
-                                      child: Text(
-                                        "Ad's",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium,
-                                      ),
-                                    ),
+                          child: DataTable(
+                            columnSpacing: 20,
+                            columns: [
+                              DataColumn(
+                                label: Text(
+                                  "Ad's",
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  "Member Name",
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  "Member Type",
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  "From Date",
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  "To Date",
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  "Price",
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  "Action",
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .bodySmall,
+                                ),
+                              ),
+                            ],
+                            rows: [
+                              for (var item in data)
+                                DataRow(
+                                  color: MaterialStateColor.resolveWith(
+                                        (states) => Colors.grey[200]!,
                                   ),
-                                  TableCell(
-                                    child: Center(
-                                      child: Text(
-                                        "Member Name",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium,
-                                      ),
-                                    ),
-                                  ),
-                                  TableCell(
-                                    child: Center(
-                                      child: Text(
-                                        "Member Type",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium,
-                                      ),
-                                    ),
-                                  ),
-                                  TableCell(
-                                    child: Center(
-                                      child: Text(
-                                        "From Date",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium,
-                                      ),
-                                    ),
-                                  ),
-                                  TableCell(
-                                    child: Center(
-                                      child: Text(
-                                        "To Date",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium,
-                                      ),
-                                    ),
-                                  ),
-                                  TableCell(
-                                    child: Center(
-                                      child: Text(
-                                        "Price",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium,
-                                      ),
-                                    ),
-                                  ),
-                                  TableCell(
-                                    child: Center(
-                                      child: Column(
+                                  cells: [
+                                    DataCell(
+                                      Column(
                                         children: [
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            "Action",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .headlineMedium,
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      AddImageView(
+                                                        membername: item['member_name'],
+                                                        memberId: item['id'],
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                            child: Text(
+                                              "View",
+                                              style: TextStyle(
+                                                  color: Colors.green),
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              for (var item in data)
-                                TableRow(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                  ),
-                                  children: [
-                                    TableCell(
-                                      child: Center(
-                                        child: Column(
-                                          children: [
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            SizedBox(
-                                                height: 50,
-                                                width: 100,
-                                                child: TextButton(
-                                                  onPressed: () {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              AddImageView(
-                                                                membername: item[
-                                                                    'member_name'],
-                                                                memberId:
-                                                                    item['id'],
-                                                              )),
-                                                    );
-                                                  },
-                                                  child: Text(
-                                                    "View",
-                                                    style: TextStyle(
-                                                        color: Colors.green),
-                                                  ),
-                                                )),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Center(
+                                    DataCell(
+                                      Center(
                                         child: Text(
-                                            item['member_name'].toString()),
+                                            item['member_name'].toString(),
+                                            style: Theme
+                                                .of(context)
+                                                .textTheme
+                                                .bodySmall),
                                       ),
                                     ),
-                                    TableCell(
-                                      child: Center(
-                                        child: Text(item['member_type'] ?? ''),
+                                    DataCell(
+                                      Center(
+                                        child: Text(item['member_type'] ?? '',
+                                            style: Theme
+                                                .of(context)
+                                                .textTheme
+                                                .bodySmall),
                                       ),
                                     ),
-                                    TableCell(
-                                      child: Center(
+                                    DataCell(
+                                      Center(
                                         child: Text(
                                           DateFormat('dd/MM/yyyy').format(
-                                              DateTime.parse(
-                                                  item['from_date'] ?? '')),
+                                            DateTime.parse(
+                                                item['from_date'] ?? ''),
+                                          ),
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .bodySmall,
                                         ),
                                       ),
                                     ),
-                                    TableCell(
-                                      child: Center(
+                                    DataCell(
+                                      Center(
                                         child: Text(
                                           DateFormat('dd/MM/yyyy').format(
-                                              DateTime.parse(
-                                                  item['to_date'] ?? '')),
+                                            DateTime.parse(
+                                                item['to_date'] ?? ''),
+                                          ),
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .bodySmall,
                                         ),
                                       ),
                                     ),
-                                    TableCell(
-                                      child: Center(
-                                        child: Text(item['price'] ?? ''),
+                                    DataCell(
+                                      Center(
+                                        child: Text(
+                                            item['price'] ?? '', style: Theme
+                                            .of(context)
+                                            .textTheme
+                                            .bodySmall),
                                       ),
                                     ),
-                                    TableCell(
-                                      child: Center(
+                                    DataCell(
+                                      Center(
                                         child: IconButton(
+                                          icon: const Icon(
+                                              Icons.delete, color: Colors.red),
                                           onPressed: () {
-                                            if (_formKey.currentState!
-                                                .validate()) {
-                                              _showDialog(context);
-                                            }
+                                            showDialog(
+                                              context: context,
+                                              builder: (ctx) =>
+                                                  AlertDialog(
+                                                    backgroundColor: Colors
+                                                        .grey[800],
+                                                    title: const Text('Delete',
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .white)),
+                                                    content: const Text(
+                                                        "Do you want to Delete the Subscription Details?",
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .white)),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () async {
+                                                          delete(item["id"]);
+                                                          Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                  builder: (
+                                                                      context) => const ListAds()));
+                                                          ScaffoldMessenger.of(
+                                                              context)
+                                                              .showSnackBar(
+                                                              const SnackBar(
+                                                                content: Text(
+                                                                    "Successfully Deleted "),
+                                                              ));
+                                                        },
+                                                        child: const Text(
+                                                            'Yes'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        child: const Text('No'),
+                                                      )
+                                                    ],
+                                                  ),
+                                            );
                                           },
-                                          icon: const Icon(Icons.delete),
-                                          color: Colors.redAccent,
                                         ),
                                       ),
                                     ),
@@ -305,8 +339,8 @@ class _ListAdsPageState extends State<ListAdsPage> {
                             ],
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -316,46 +350,22 @@ class _ListAdsPageState extends State<ListAdsPage> {
       ),
     );
   }
-}
 
-void _showDialog(BuildContext context) {
-  showDialog<void>(
-    context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        backgroundColor: Colors.black,
-        title: Text(
-          'Delete',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        content: Text('Are you sure do you want to delete this?',
-            style: Theme.of(context).textTheme.headlineMedium),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                child: Text(
-                  'cancel',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                },
-              ),
-              TextButton(
-                child: Text(
-                  'delete',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                onPressed: () {
-                  // Handle delete action
-                },
-              ),
-            ],
-          ),
-        ],
-      );
-    },
-  );
+
+  Future<void> delete(String getID) async {
+    try {
+      final url = Uri.parse(
+          'http://mybudgetbook.in/GIBADMINAPI/ads.php?id=$getID');
+      print('member_category_url :$url');
+      final response = await http.delete(url);
+      if (response.statusCode == 200) {
+        print("Cat-status code :${response.statusCode}");
+        print("Cat-response body :${response.body}");
+      } else {
+        print('Error: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
 }

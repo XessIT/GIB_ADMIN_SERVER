@@ -59,43 +59,43 @@ class _QRCreationsPageState extends State<QRCreationsPage> {
       print('Error: $e');
     }
   }
-  Future<Uint8List> generatePdf() async {
+  Future<void> generatePdf(Map<String, dynamic> meeting) async {
     final pdf = pw.Document();
 
-    for (final meeting in meetings) {
-      final qrImageData = await QrPainter(
-        data: meeting['id'].toString(),
-        color: const Color(0xff000000),
-        version: QrVersions.auto,
-        errorCorrectionLevel: QrErrorCorrectLevel.L,
-      ).toImageData(200);
+    final qrImageData = await QrPainter(
+      data: meeting['id'].toString(),
+      color: const Color(0xff000000),
+      version: QrVersions.auto,
+      errorCorrectionLevel: QrErrorCorrectLevel.L,
+    ).toImageData(200);
 
-      final qrImage = pw.MemoryImage(qrImageData!.buffer.asUint8List());
+    final qrImage = pw.MemoryImage(qrImageData!.buffer.asUint8List());
 
-      pdf.addPage(
-        pw.Page(
-          build: (pw.Context context) {
-            return pw.Center(
-              child: pw.Column(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: [
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(8.0),
-                    child: pw.Image(
-                      qrImage,
-                      width: 200.0,
-                      height: 200.0,
-                    ),
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Center(
+            child: pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8.0),
+                  child: pw.Image(
+                    qrImage,
+                    width: 200.0,
+                    height: 200.0,
                   ),
-                ],
-              ),
-            );
-          },
-        ),
-      );
-    }
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
 
-    return await pdf.save();
+    final pdfBytes = await pdf.save();
+    final fileName = '${meeting['meeting_date']}_${meeting['meeting_type']}.pdf';
+    await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
   }
 
   Future<void> updateQrStatus(String meetingId) async {
@@ -207,7 +207,7 @@ class _QRCreationsPageState extends State<QRCreationsPage> {
                               child: SingleChildScrollView(
                                 child: SizedBox(
                                   child: DataTable(
-                                    columnSpacing:20,
+                                    columnSpacing: 20,
                                     columns: const [
                                       DataColumn(label: Text('S.No')),
                                       DataColumn(label: Padding(
@@ -223,18 +223,16 @@ class _QRCreationsPageState extends State<QRCreationsPage> {
                                       DataColumn(label: Text('Member Type')),
                                       // Add more DataColumn widgets for other fields as needed
                                     ],
-
                                     rows: meetings.map((meeting) {
                                       index++;
                                       return DataRow(cells: [
                                         DataCell(Padding(
                                           padding: const EdgeInsets.all(8.0),
-                                          child: Center(child: Text('$index',style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0))),
+                                          child: Center(child: Text('$index', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0))),
                                         )),
                                         DataCell(
                                           Center(
-                                            child:
-                                            meeting['qr_status'] == 'Generated' ?
+                                            child: meeting['qr_status'] == 'Generated' ?
                                             IconButton(
                                               onPressed: () {
                                                 showDialog(
@@ -259,8 +257,8 @@ class _QRCreationsPageState extends State<QRCreationsPage> {
                                                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                               children: [
                                                                 IconButton(
-                                                                  onPressed: () {
-                                                                    generatePdf();
+                                                                  onPressed: () async {
+                                                                    await generatePdf(meeting);
                                                                   },
                                                                   icon: Icon(Icons.print),
                                                                 ),
@@ -281,9 +279,9 @@ class _QRCreationsPageState extends State<QRCreationsPage> {
                                                     );
                                                   },
                                                 );
-                                                },
+                                              },
                                               icon: Icon(Icons.qr_code),
-                                            ):
+                                            ) :
                                             TextButton(
                                               child: Text('Generate'),
                                               onPressed: () {
@@ -328,8 +326,8 @@ class _QRCreationsPageState extends State<QRCreationsPage> {
                                                                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                                           children: [
                                                                             IconButton(
-                                                                              onPressed: () {
-                                                                                generatePdf();
+                                                                              onPressed: () async {
+                                                                                await generatePdf(meeting);
                                                                               },
                                                                               icon: Icon(Icons.print),
                                                                             ),
@@ -350,27 +348,29 @@ class _QRCreationsPageState extends State<QRCreationsPage> {
                                                                   ],
                                                                 );
                                                               },
-                                                            );                                                          },
+                                                            );
+                                                          },
                                                         ),
                                                       ],
                                                     );
                                                   },
                                                 );
                                               },
-                                            )
+                                            ),
                                           ),
                                         ),
-                                        DataCell(Center(child: Text('${meeting['meeting_date']}',style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
-                                        DataCell(Center(child: Text('${meeting['district']}',style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
-                                        DataCell(Center(child: Text('${meeting['chapter']}',style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
-                                        DataCell(Center(child: Text('${meeting['place']}',style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
-                                        DataCell(Center(child: Text('${meeting['team_name']}',style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
-                                        DataCell(Center(child: Text('${meeting['meeting_type']}',style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
-                                        DataCell(Center(child: Text('${meeting['member_type']}',style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
+                                        DataCell(Center(child: Text('${meeting['meeting_date']}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
+                                        DataCell(Center(child: Text('${meeting['district']}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
+                                        DataCell(Center(child: Text('${meeting['chapter']}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
+                                        DataCell(Center(child: Text('${meeting['place']}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
+                                        DataCell(Center(child: Text('${meeting['team_name']}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
+                                        DataCell(Center(child: Text('${meeting['meeting_type']}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
+                                        DataCell(Center(child: Text('${meeting['member_type']}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 14.0)))),
                                         // Add more DataCell widgets for other fields as needed
                                       ]);
                                     }).toList(),
-                                  ),
+                                  )
+
                                 ),
                               ),
                             ),

@@ -87,7 +87,8 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
   List<Map<String, dynamic>> suggesstiondataitemName = [];
   Future<void> getChapter(String district) async {
     try {
-      final url = Uri.parse('http://mybudgetbook.in/GIBAPI/chapter.php?district=$district'); // Fix URL
+      final url = Uri.parse(
+          'http://mybudgetbook.in/GIBAPI/chapter.php?district=$district'); // Fix URL
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -98,8 +99,7 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
         print('Sorted chapter Names: $suggesstiondataitemName');
         setState(() {
           print('chapter: $chapters');
-          setState(() {
-          });
+          setState(() {});
           chapterController.clear();
         });
       } else {
@@ -143,6 +143,9 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
 
   List<Map<String, dynamic>> members = [];
 
+  List<Map<String, dynamic>> filteredMembers = [];
+  TextEditingController searchController = TextEditingController();
+
   Future<void> getMembers(String district, String chapter) async {
     try {
       final url = Uri.parse(
@@ -150,32 +153,22 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        print(
-            'Response body: ${response.body}'); // Print the entire response body for debugging
-
-        List<dynamic>? responseData = json.decode(response.body);
-        print(
-            'Decoded data: $responseData'); // Print the decoded data for debugging
+        List<dynamic> responseData = json.decode(response.body);
 
         if (responseData is List && responseData.isNotEmpty) {
           setState(() {
-            print("Members $responseData");
             members = responseData.map((e) {
-              Map<String, dynamic> convertedMap = {};
-              e.forEach((key, value) {
-                convertedMap[key.toString()] = value;
-              });
+              Map<String, dynamic> convertedMap = Map<String, dynamic>.from(e);
 
               bool isChecked = convertedMap.containsKey('isChecked')
-                  ? convertedMap['isChecked'] == 0
-                      ? false
-                      : true
+                  ? convertedMap['isChecked'] == 1 // Assuming 1 means true
                   : false;
 
               return {...convertedMap, 'isChecked': isChecked};
             }).toList();
 
-            print("Members $members");
+            // Update filteredMembers when members are fetched
+            filterMembers('');
           });
         } else {
           print('Empty or invalid response data.');
@@ -186,6 +179,17 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
     } catch (error) {
       print('Error: $error');
     }
+  }
+
+  void filterMembers(String query) {
+    setState(() {
+      filteredMembers = members
+          .where((member) => member['first_name']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase()))
+          .toList();
+    });
   }
 
   ///team name update
@@ -388,11 +392,9 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextFormField(
+                              controller: searchController,
                               onChanged: (val) {
-                                //search bar
-                                setState(() {
-                                  name = val;
-                                });
+                                filterMembers(val);
                               },
                               decoration: const InputDecoration(
                                 prefixIcon: Icon(
@@ -436,11 +438,15 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
                                           child: Column(
                                             children: [
                                               const SizedBox(height: 2),
-                                              Text(
-                                                'S.No',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall,
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Text(
+                                                  'S.No',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .headlineSmall,
+                                                ),
                                               ),
                                               const SizedBox(height: 2),
                                             ],
@@ -449,21 +455,27 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
                                       ),
                                       TableCell(
                                         child: Center(
-                                          child: Text(
-                                            'Name',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              'Name',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineSmall,
+                                            ),
                                           ),
                                         ),
                                       ),
                                       TableCell(
                                         child: Center(
-                                          child: Text(
-                                            'Mobile No',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              'Mobile No',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineSmall,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -472,33 +484,37 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
                                           child: Column(
                                             children: [
                                               const SizedBox(height: 2),
-                                              Text(
-                                                'Member Type',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall,
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Text(
+                                                  'Member Type',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .headlineSmall,
+                                                ),
                                               ),
                                             ],
                                           ),
                                         ),
                                       ),
-                                      TableCell(
-                                        child: Center(
-                                          child: Column(
-                                            children: [
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                'Status',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                      // TableCell(
+                                      //   child: Center(
+                                      //     child: Column(
+                                      //       children: [
+                                      //         const SizedBox(height: 2),
+                                      //         Text(
+                                      //           'Status',
+                                      //           style: Theme.of(context)
+                                      //               .textTheme
+                                      //               .bodySmall,
+                                      //         ),
+                                      //       ],
+                                      //     ),
+                                      //   ),
+                                      // ),
                                     ]),
-                                for (var i = 0; i < members.length; i++)
+                                for (var i = 0; i < filteredMembers.length; i++)
                                   TableRow(
                                     decoration:
                                         BoxDecoration(color: Colors.grey[200]),
@@ -511,7 +527,7 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
                                               Row(
                                                 children: [
                                                   Checkbox(
-                                                    value: members[i]
+                                                    value: filteredMembers[i]
                                                         ['isChecked'],
                                                     onChanged: (value) {
                                                       setState(() {
@@ -542,8 +558,8 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
                                                     const EdgeInsets.all(8.0),
                                                 child: Align(
                                                   alignment: Alignment.topLeft,
-                                                  child: Text(
-                                                      members[i]['first_name']),
+                                                  child: Text(filteredMembers[i]
+                                                      ['first_name']),
                                                 ),
                                               ),
                                               const SizedBox(height: 8),
@@ -558,7 +574,8 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
                                             child: Padding(
                                               padding:
                                                   const EdgeInsets.all(8.0),
-                                              child: Text(members[i]['mobile']),
+                                              child: Text(
+                                                  filteredMembers[i]['mobile']),
                                             ),
                                           ),
                                         ),
@@ -570,23 +587,23 @@ class _AllocationDetailsPageState extends State<AllocationDetailsPage> {
                                             child: Padding(
                                               padding:
                                                   const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                  members[i]['member_type']),
+                                              child: Text(filteredMembers[i]
+                                                  ['member_type']),
                                             ),
                                           ),
                                         ),
                                       ),
-                                      TableCell(
-                                        child: Center(
-                                          child: IconButton(
-                                            onPressed: () {},
-                                            icon: const Icon(
-                                              Icons.check_circle,
-                                              color: Colors.green,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      // TableCell(
+                                      //   child: Center(
+                                      //     child: IconButton(
+                                      //       onPressed: () {},
+                                      //       icon: const Icon(
+                                      //         Icons.check_circle,
+                                      //         color: Colors.green,
+                                      //       ),
+                                      //     ),
+                                      //   ),
+                                      // ),
                                     ],
                                   ),
                               ],

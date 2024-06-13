@@ -311,64 +311,52 @@ class _AllocatedTeamViewPageState extends State<AllocatedTeamViewPage> {
                         alignment: Alignment.center,
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: DataTable(
+                          child: Center(
+                            child: PaginatedDataTable(
+                              header:
+                                  const Text(''), // Add a header for your table
+                              rowsPerPage: 10,
+                              columnSpacing: 100, // Number of rows per page
                               columns: [
                                 DataColumn(
-                                    label: Text('S.No',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium)),
+                                    label: Text(
+                                  'S.No',
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                )),
                                 DataColumn(
-                                    label: Text('Member ID',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium)),
+                                    label: Text(
+                                  'Member ID',
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                )),
                                 DataColumn(
-                                    label: Text('Name',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium)),
-                                //DataColumn(label: Text('Email', style: Theme.of(context).textTheme.headlineMedium)),
+                                    label: Text(
+                                  'Name',
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                )),
                                 DataColumn(
-                                    label: Text('Mobile',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium)),
+                                    label: Text(
+                                  'Mobile',
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                )),
                                 DataColumn(
-                                    label: Text('Member',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium)),
+                                    label: Text(
+                                  'Member',
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                )),
                                 DataColumn(
-                                    label: Text('Team Name',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium)),
+                                    label: Text(
+                                  'Team Name',
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                )),
                               ],
-                              rows: List<DataRow>.generate(tableData.length,
-                                  (index) {
-                                return DataRow(
-                                  cells: [
-                                    DataCell(
-                                        Text((index + 1).toString())), // S.No
-                                    DataCell(Text(
-                                        tableData[index]['member_id'] ?? '')),
-                                    DataCell(Text(tableData[index]
-                                            ['first_name'] ??
-                                        '')), // Name
-                                    //DataCell(Text(tableData[index]['Email'] ?? '')), // Email
-                                    DataCell(Text(tableData[index]['mobile'] ??
-                                        '')), // Mobile
-                                    DataCell(Text(tableData[index]
-                                            ['member_type'] ??
-                                        '')), // Member
-                                    DataCell(Text(
-                                        tableData[index]['team_name'] ?? '')),
-                                  ],
-                                );
-                              }),
+                              source: MyDataSource(tableData,
+                                  context), // Define your data source
                             ),
                           ),
                         ),
@@ -383,4 +371,51 @@ class _AllocatedTeamViewPageState extends State<AllocatedTeamViewPage> {
       ),
     );
   }
+}
+
+class MyDataSource extends DataTableSource {
+  final List<Map<String, dynamic>> _tableData; // Change this line
+
+  MyDataSource(this._tableData, this.context);
+  final BuildContext context;
+
+  @override
+  DataRow getRow(int index) {
+    final rowData = _tableData[index];
+    return DataRow(cells: [
+      DataCell(Text(
+        (index + 1).toString(),
+        style: Theme.of(context).textTheme.bodySmall,
+      )), // S.No
+      DataCell(Text(
+        rowData['member_id'] ?? '',
+        style: Theme.of(context).textTheme.bodySmall,
+      )),
+      DataCell(Text(
+        rowData['first_name'] ?? '',
+        style: Theme.of(context).textTheme.bodySmall,
+      )), // Name
+      DataCell(Text(
+        rowData['mobile'] ?? '',
+        style: Theme.of(context).textTheme.bodySmall,
+      )), // Mobile
+      DataCell(Text(
+        rowData['member_type'] ?? '',
+        style: Theme.of(context).textTheme.bodySmall,
+      )), // Member
+      DataCell(Text(
+        rowData['team_name'] ?? '',
+        style: Theme.of(context).textTheme.bodySmall,
+      )),
+    ]);
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => _tableData.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

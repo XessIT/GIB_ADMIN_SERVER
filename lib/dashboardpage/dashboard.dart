@@ -181,7 +181,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         setState(() {
-          honortotalRows = responseData['totalAmount'] ?? "0";
+          honortotalRows = responseData['totalAmount'] ?? '0';
         });
       } else {
         print('Error: ${response.statusCode}');
@@ -235,10 +235,6 @@ class _MainScreenPageState extends State<MainScreenPage> {
             children: [
               const SizedBox(
                 height: 10,
-              ),
-              Text(
-                "Gounders In Business",
-                style: Theme.of(context).textTheme.displayLarge,
               ),
               const SizedBox(
                 height: 10,

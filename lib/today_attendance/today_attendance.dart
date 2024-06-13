@@ -65,39 +65,47 @@ class _TodayAttendanceState extends State<TodayAttendance> {
                 SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: TypeAheadFormField<Map<String, dynamic>>(
-                    textFieldConfiguration: TextFieldConfiguration(
-                      controller: searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Search...',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 300,
+                        child: TypeAheadFormField<Map<String, dynamic>>(
+                          textFieldConfiguration: TextFieldConfiguration(
+                            controller: searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Search...',
+                              prefixIcon: Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                          ),
+                          suggestionsCallback: (pattern) async {
+                            if (pattern.isEmpty) {
+                              return [];
+                            } else {
+                              searchResults = await fetchNames(pattern);
+                              return searchResults;
+                            }
+                          },
+                          itemBuilder: (context, suggestion) {
+                            return ListTile(
+                              title: Text(suggestion['full_name']),
+                            );
+                          },
+                          onSuggestionSelected: (suggestion) {
+                            setState(() {
+                              searchController.text = suggestion['full_name'];
+                              idController.text = suggestion['id'].toString();
+                              memberTypeController.text = suggestion['member_type'];
+                              selectedUserID = idController.text;
+                              selectedMemberType = memberTypeController.text;
+                            });
+                          },
                         ),
                       ),
-                    ),
-                    suggestionsCallback: (pattern) async {
-                      if (pattern.isEmpty) {
-                        return [];
-                      } else {
-                        searchResults = await fetchNames(pattern);
-                        return searchResults;
-                      }
-                    },
-                    itemBuilder: (context, suggestion) {
-                      return ListTile(
-                        title: Text(suggestion['full_name']),
-                      );
-                    },
-                    onSuggestionSelected: (suggestion) {
-                      setState(() {
-                        searchController.text = suggestion['full_name'];
-                        idController.text = suggestion['id'].toString();
-                        memberTypeController.text = suggestion['member_type'];
-                        selectedUserID = idController.text;
-                        selectedMemberType = memberTypeController.text;
-                      });
-                    },
+                    ],
                   ),
                 ),
                 SizedBox(
