@@ -103,73 +103,6 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
   List<Map<String, dynamic>> ponumdata = [];
   String? mID;
   List<Map<String, dynamic>> codedatas = [];
-  String generateID() {
-    DateTime now=DateTime.now();
-    String year=(now.year%100).toString();
-    String month=now.month.toString().padLeft(2,'0');
-    if (mID != null) {
-      String ID = mID!.substring(7);
-      int idInt = int.parse(ID) + 1;
-      String id = 'GIB$year$month/${idInt.toString().padLeft(3, '0')}';
-      print(id);
-      return id;
-    }
-    return "";
-  }
-  Future<void> memberIDGenerate() async {
-    try {
-      final response = await http.get(Uri.parse('http://localhost:3309/generate_id'));
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = jsonDecode(response.body);
-        for(var item in jsonData){
-          mID = getNameFromJsonDatasalINv(item);
-          print('member_id: $mID');
-        }
-        setState(() {
-          ponumdata = jsonData.cast<Map<String, dynamic>>();
-          poNumber = generateID(); // Call generateId here
-        });
-      } else {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text('Failed to fetch data'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } catch (error) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('An error occurred: $error'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-
-
 
 
   Future<void> getData() async {
@@ -230,7 +163,9 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
           "id": ID,
           "member_id":salRetNum,
         }),
+
       );
+      print(" member if new${salRetNum}");
       if (response.statusCode == 200) {
         Navigator.push(context, MaterialPageRoute(builder: (context) => const NewMemberApproval()));
        // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Successfully Rejected")));
@@ -242,28 +177,68 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
       // Handle error as needed
     }
   }
+
+
+/*  String generateId() {
+    DateTime now = DateTime.now();
+    String year = (now.year % 100).toString();
+    String month = now.month.toString().padLeft(2, '0');
+
+    if (gID != null && gID!.length >= 11) {
+      try {
+        String ID = gID!.substring(7);
+        print("generateId: $ID");
+
+        int idInt = int.parse(ID) + 1;
+        String id = 'GIB$year$month${idInt.toString().padLeft(3, '0')}';
+        print("--------------------------------------------------------------: $id");
+        print("generateId: $id");
+        return id;
+      } catch (e) {
+        print("Error parsing ID: $e");
+        return "";
+      }
+    } else {
+      print("Invalid gID format: $gID");
+      return "";
+    }
+  }*/
+
+  String generateId() {
+    DateTime now= DateTime.now();
+    String year=(now.year%100).toString();
+    String month=now.month.toString().padLeft(2,'0');
+    if (gID != null) {
+      String iD = gID!.substring(7);
+      int idInt = int.parse(iD) + 1;
+      String id = 'GIB$year$month${idInt.toString().padLeft(4, '0')}';
+      print(id);
+      return id;
+    }
+    return "";
+  }
   ///
   List<Map<String, dynamic>> filteredData = [];
 
   Future<void> ponumfetch() async {
     try {
       final url = Uri.parse('http://mybudgetbook.in/GIBADMINAPI/new_member_approval.php');
-      print("ponumurl:$url");
+      print("ponumurl: $url");
       final response = await http.get(url);
       if (response.statusCode == 200) {
-        print("status code:${response.statusCode}");
-        print("status body:${response.body}");
+        print("status code: ${response.statusCode}");
+        print("status body: ${response.body}");
         final List<dynamic> jsonData = jsonDecode(response.body);
-        for(var item in jsonData){
+        for (var item in jsonData) {
           gID = getNameFromJsonData(item);
-          print('member_id: $gID');
+          print('member_id 23: $gID');
         }
         setState(() {
           srnumdata = jsonData.cast<Map<String, dynamic>>();
-          print("salRetNumber:$srnumdata");
+          print("salRetNumber: $srnumdata");
 
           salRetNum = generateId();
-          print("salRetNo:$salRetNum");
+          print("salRetNo: $salRetNum");
         });
       } else {
         showDialog(
@@ -323,23 +298,7 @@ class _NewMemberApprovalPageState extends State<NewMemberApprovalPage> {
     return data.sublist(start, end > data.length ? data.length : end);
   }
 
-  String generateId() {
-    DateTime now=DateTime.now();
-    String year=(now.year%100).toString();
-    String month=now.month.toString().padLeft(2,'0');
 
-    if (gID != null) {
-      String ID = gID!.substring(7);
-      print("generateId:$ID");
-
-      int idInt = int.parse(ID) + 1;
-      String id = 'GIB$year$month${idInt.toString().padLeft(4, '0')}';
-      print("--------------------------------------------------------------:$id");
-      print("generateId:$id");
-      return id;
-    }
-    return "";
-  }
   ///
   @override
   void initState() {
@@ -1142,16 +1101,7 @@ class _RejectMembersState extends State<RejectMembers> {
                         ],
                       ),
                       const SizedBox(height: 20,),
-                      /*// go back
-                      Align(alignment: Alignment.topRight,
-                        child: ElevatedButton(onPressed: (){
-                          if(_formKey.currentState!.validate()){}
-                          Navigator.pop(context);
-                        },
-                            child: const Text("Go back",style: TextStyle(fontSize: 9),)),
-                      ),
-                      //show
-                      const SizedBox(height: 15,),*/
+
 //Search TextFormField starts
                       Align(alignment: Alignment.topRight,
                         child: SizedBox(
@@ -1173,7 +1123,6 @@ class _RejectMembersState extends State<RejectMembers> {
                           ),
                         ),
                       ),
-//Search TextFormField end
                       const SizedBox(height: 20,),
                       //Table
                       const SizedBox(height: 20,),
@@ -1204,108 +1153,6 @@ class _RejectMembersState extends State<RejectMembers> {
                           ),
                         ),
                       ),
-                      /*Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Table(
-                                  border: TableBorder.all(),
-                                  defaultColumnWidth: const FixedColumnWidth(140.0),
-                                  columnWidths: const <int, TableColumnWidth>{
-                                    0:FixedColumnWidth(100),
-                                    1:FixedColumnWidth(200),
-                                    2:FixedColumnWidth(200),
-                                    4:FixedColumnWidth(200),
-                                  },
-                                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                  children:[
-                                    //Table row starting
-                                    TableRow(
-                                        children: [
-                                          TableCell(
-                                              child:Center(
-                                                child: Column(
-                                                  children: [
-                                                    const SizedBox(height: 8,),
-                                                    Text('S.No',
-                                                      style: Theme.of(context).textTheme.headlineMedium,),
-                                                    const SizedBox(height: 8,)
-                                                  ],
-                                                ),)),
-                                          //Meeting Name
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Name',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Email',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Mobile',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Company Name',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          TableCell(
-                                              child:Center(
-                                                child: Text('Status',
-                                                  style: Theme.of(context).textTheme.headlineMedium,),)),
-                                          // Edit
-                                        ]),
-                                    // Table row end
-                                    for(var i = 0 ;i < data.length; i++)...[
-                                      if(data[i]['first_name']
-                                          .toString()
-                                          .toLowerCase().startsWith(name.toLowerCase()))
-                                      //Table row start
-                                        TableRow(
-                                          // decoration: BoxDecoration(color: Colors.grey[200]),
-                                            children: [
-                                              // 1 s.no
-                                              TableCell(child: Center(child: Column(
-                                                children: [
-                                                  const SizedBox(height: 10,),
-                                                  Text("${i+1}", style: Theme.of(context).textTheme.bodySmall,),
-                                                  const SizedBox(height: 10,)
-                                                ],
-                                              ))),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["first_name"]}", style: Theme.of(context).textTheme.bodySmall,),
-                                              )
-                                              ),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["email"]}", style: Theme.of(context).textTheme.bodySmall,),
-                                              )
-                                              ),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["mobile"]}", style: Theme.of(context).textTheme.bodySmall,),
-                                              )
-                                              ),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["company_name"]}", style: Theme.of(context).textTheme.bodySmall,),
-                                              )
-                                              ),
-                                              TableCell(child:Padding(
-                                                padding: const EdgeInsets.only(left: 10),
-                                                child: Text("${data[i]["admin_rights"]}",style: TextStyle(color: Colors.red),),
-                                              )
-                                              ),
-                                            ]
-                                        )
-                                    ]
-                                  ]
-                              )
-                          ),
-                        ),
-                      )*/
                     ],
                   ),
                 ),
