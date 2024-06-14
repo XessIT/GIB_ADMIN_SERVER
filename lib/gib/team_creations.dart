@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart' as http;
@@ -28,6 +29,7 @@ final _formKey = GlobalKey<FormState>();
 
 class _TeamCreationspageState extends State<TeamCreationspage> {
   TextEditingController teamnamecontroller = TextEditingController();
+  final ScrollController _scrollController=ScrollController();
   TextEditingController editteam = TextEditingController();
   String name = "";
   TextEditingController districtController = TextEditingController();
@@ -101,7 +103,7 @@ class _TeamCreationspageState extends State<TeamCreationspage> {
     print('Attempting to make HTTP request...');
     try {
       final url = Uri.parse(
-          'http://mybudgetbook.in/GIBADMINAPI/team_creations.php');
+          'http://mybudgetbook.in/GIBADMINAPI/team_creations.php?table=team_creations');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -160,7 +162,7 @@ class _TeamCreationspageState extends State<TeamCreationspage> {
     }
   }
 
-  Future<void> editTeam(int id) async {
+ /* Future<void> editTeam(int id) async {
     try {
       final url = Uri.parse(
           'http://mybudgetbook.in/GIBADMINAPI/team_creations.php');
@@ -200,7 +202,7 @@ class _TeamCreationspageState extends State<TeamCreationspage> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Error: $e")));
     }
-  }
+  }*/
 
   Future<void> delete(String id) async {
     try {
@@ -209,6 +211,8 @@ class _TeamCreationspageState extends State<TeamCreationspage> {
       final response = await http.delete(url);
       print("Delete Url: $url");
       if (response.statusCode == 200) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const TeamCreations()));
         // Success handling, e.g., show a success message
       } else {
         // Error handling, e.g., show an error message
@@ -391,7 +395,36 @@ class _TeamCreationspageState extends State<TeamCreationspage> {
                     const SizedBox(
                       height: 20,
                     ),
-                    SingleChildScrollView(
+                    Scrollbar(
+                      thumbVisibility: true,
+                      controller: _scrollController,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        controller: _scrollController,
+                        child: SizedBox(
+                          width: 1000,
+                          child: PaginatedDataTable(
+                            columnSpacing: 50,
+                            rowsPerPage: 15,
+                            columns: const [
+                              DataColumn(label: Center(child: Text("S.No", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("District", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("Chapter", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("Team Name", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("Edit", style: TextStyle(fontWeight: FontWeight.bold)))),
+                              DataColumn(label: Center(child: Text("Delete", style: TextStyle(fontWeight: FontWeight.bold)))),
+                            ],
+                            source: MyDataTableSource(
+                              data: data,
+                             // editTeam: editTeam, // Pass the unblocked function here
+                              delete: delete, // Pass the unblocked function here
+                              context: context,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                /*    SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Table(
                             border: TableBorder.all(),
@@ -628,7 +661,8 @@ class _TeamCreationspageState extends State<TeamCreationspage> {
                                                   icon: Icon(
                                                     Icons.edit_note,
                                                     color: Colors.blue,
-                                                  )))),
+                                                  ))
+                                          )),
 
                                       TableCell(
                                           child: Center(
@@ -690,11 +724,12 @@ class _TeamCreationspageState extends State<TeamCreationspage> {
                                                   icon: const Icon(
                                                     Icons.delete,
                                                     color: Colors.red,
-                                                  )))),
+                                                  ))
+                                          )),
                                       // 5 chapter
                                     ]),
                               ]
-                            ]))
+                            ]))*/
                   ],
                 ),
               ),
@@ -704,103 +739,272 @@ class _TeamCreationspageState extends State<TeamCreationspage> {
       ),
     );
   }
+  List<Map<String, dynamic>> filterData(String searchTerm) {
+    if (searchTerm.isEmpty) {
+      return data;
+    } else {
+      return data.where((item) => item["first_name"].toLowerCase().contains(searchTerm.toLowerCase())).toList();
+    }
+  }
 }
+class MyDataTableSource extends DataTableSource {
+  List<Map<String, dynamic>> data;
+  BuildContext context;
+
+  final Future<void> Function(String id) delete;
+  Future<void> editTeam(int id) async {
+    try {
+      final url = Uri.parse(
+          'http://mybudgetbook.in/GIBADMINAPI/team_creations.php');
+      print(url);
+      print("Team Name: ${editteam.text}");
+
+      final response = await http.put(
+        url,
+        body: jsonEncode({
+          "team_name": editteam.text,
+          "id": id,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        if (responseBody["Success"] == true) {
+          print("Response Status: ${response.statusCode}");
+          print("Response Body: ${response.body}");
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Successfully Edited")));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const TeamCreations()));
+        } else if (responseBody["Message"] == "Duplicate entry") {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Team Name is already exists")));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(responseBody["Message"] ?? "Failed to Edit")));
+        }
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Failed to Edit")));
+      }
+    } catch (e) {
+      print("Error during edit: $e");
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+  TextEditingController editteam =TextEditingController();
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text.substring(0, 1).toUpperCase() + text.substring(1);
+  }
+  MyDataTableSource({required this.data, required this.delete, required this.context});
+
+  @override
+  int get rowCount => data.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+
+  @override
+  DataRow getRow(int index) {
+    return DataRow(
+      cells: [
+        DataCell(Text('${index + 1}')),
+        DataCell(Text('${data[index]["district"]}')),
+        DataCell(Text('${data[index]["chapter"]}')),
+        DataCell(Text('${data[index]["team_name"]}')),
+        DataCell(
+            IconButton(
+                onPressed: () {
+                  showDialog<void>(
+                    context: context,
+                    builder: (BuildContext
+                    dialogContext) {
+                      return AlertDialog(
+                        backgroundColor:
+                        Colors.grey[800],
+                        title: const Text(
+                            'Edit',
+                            style: TextStyle(
+                                color: Colors
+                                    .white)),
+                        content: SizedBox(
+                          width: 300,
+                          child:
+                          TextFormField(
+                            controller: editteam =
+                                TextEditingController(
+                                    text: data[
+                                    index]
+                                    [
+                                    "team_name"]),
+                            onChanged:
+                                (value) {
+                              String
+                              capitalizedValue =
+                              capitalizeFirstLetter(
+                                  value);
+                              editteam.value =
+                                  editteam
+                                      .value
+                                      .copyWith(
+                                    text:
+                                    capitalizedValue,
+                                    // selection: TextSelection.collapsed(offset: capitalizedValue.length),
+                                  );
+                            },
+                            validator:
+                                (value) {
+                              if (value!
+                                  .isEmpty) {
+                                return "Enter the field";
+                              } else {
+                                return null;
+                              }
+                            },
+                            decoration:
+                            InputDecoration(
+                                filled:
+                                true, // Fill the background
+                                fillColor:
+                                Colors
+                                    .white,
+                                suffixIcon: IconButton(
+                                    onPressed: () {
+                                      editteam.clear();
+                                    },
+                                    icon: Icon(
+                                      Icons.cancel_presentation,
+                                      color:
+                                      Colors.red,
+                                    ))),
+                          ),
+                        ),
+                        contentTextStyle:
+                        Theme.of(context)
+                            .textTheme
+                            .bodySmall,
+                        actions: <Widget>[
+                          Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment
+                                .end,
+                            children: [
+                              TextButton(
+                                child: const Text(
+                                    'Ok',
+                                    style: TextStyle(
+                                        color:
+                                        Colors.white)),
+                                onPressed:
+                                    () {
+                                  editTeam(int
+                                      .parse(data[index]
+                                  [
+                                  "id"]));
+                                  Navigator.pop(
+                                      context); // Dismiss alert dialog
+                                },
+                              ),
+                              TextButton(
+                                child: const Text(
+                                    'Cancel',
+                                    style: TextStyle(
+                                        color:
+                                        Colors.white)),
+                                onPressed:
+                                    () {
+                                  Navigator.pop(
+                                      context);
+                                  // Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                icon: Icon(
+                  Icons.edit_note,
+                  color: Colors.blue,
+                ))
+        ),
+        DataCell(
+            IconButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (ctx) =>
+                      // Dialog box for register meeting and add guest
+                      AlertDialog(
+                        backgroundColor:
+                        Colors.grey[
+                        800],
+                        title: const Text(
+                            'Delete',
+                            style: TextStyle(
+                                color: Colors
+                                    .white)),
+                        content: const Text(
+                            "Do you want to Delete the Team Name?",
+                            style: TextStyle(
+                                color: Colors
+                                    .white)),
+                        actions: [
+                          TextButton(
+                            onPressed:
+                                () async {
+                              delete(data[
+                              index]
+                              ['id']);
+                              Navigator.pop(
+                                  context);
+                              ScaffoldMessenger.of(
+                                  context)
+                                  .showSnackBar(const SnackBar(
+                                  content:
+                                  Text("You have Successfully Deleted a Team Name")));
+                            },
+                            child: const Text(
+                                'Yes',
+                                style: TextStyle(
+                                    color:
+                                    Colors.white)),
+                          ),
+                          TextButton(
+                              onPressed:
+                                  () {
+                                Navigator.pop(
+                                    context);
+                              },
+                              child: const Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color:
+                                      Colors.white)))
+                        ],
+                      ));
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ))
+        ),
+      ],
+    );
+  }
+
+  @override
+  void rowsRefresh() {
+    // handle data refresh
+  }
+}
+
 //Dialogue  button
 
-void _showDialog(BuildContext context) {
-  showDialog<void>(
-    context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        backgroundColor: Colors.black,
-        title: Text(
-          'Delete',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        content: Text('Are you sure do you want delete this?',
-            style: Theme.of(context).textTheme.bodySmall),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                child: Text(
-                  'cancel',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                onPressed: () {
-                  Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                },
-              ),
-              TextButton(
-                child: Text(
-                  'delete',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                onPressed: () {
-                  // Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                },
-              ),
-            ],
-          ),
-        ],
-      );
-    },
-  );
-}
-
-void _editnote(BuildContext context, String teamname) {
-  showDialog<void>(
-    context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text(
-          'Edit',
-        ),
-        content: SizedBox(
-          width: 300,
-          child: TextFormField(
-            validator: (value) {
-              if (value!.isEmpty) {
-                return "enter the field";
-              } else {
-                return null;
-              }
-            },
-            decoration: InputDecoration(
-                suffixIcon: IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.cancel_presentation,
-                      color: Colors.red,
-                    ))),
-          ),
-        ),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                child: const Text(
-                  'Ok',
-                ),
-                onPressed: () {
-                  Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                },
-              ),
-              TextButton(
-                child: const Text(
-                  'Cancel',
-                ),
-                onPressed: () {
-                  // Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                },
-              ),
-            ],
-          ),
-        ],
-      );
-    },
-  );
-}

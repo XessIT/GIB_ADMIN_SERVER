@@ -5,7 +5,6 @@ import 'package:http/http.dart'as http;
 
 class Guest extends StatelessWidget {
   const Guest({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
