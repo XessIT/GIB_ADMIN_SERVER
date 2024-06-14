@@ -52,6 +52,32 @@ class _MainScreenPageState extends State<MainScreenPage> {
   String silver = "Silver";
 
   String? totalRows = "0";
+  String? womens = "";
+  String? mens = "";
+  String? doctors = "";
+  String? nonExec = "";
+  String? guests = "";
+  String? allExceptGuests = "";
+
+  Future<void> fetchMemberCounts() async {
+    final response = await http
+        .get(Uri.parse('http://mybudgetbook.in/GIBADMINAPI/member_count.php'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print("Members Count $data");
+      setState(() {
+        womens = data['member_counts']['Executive Women\'s Wing'];
+        mens = data['member_counts']['Executive Men\'s Wing'];
+        doctors = data['member_counts']['Doctor\'s Wing'];
+        nonExec = data['member_counts']['Non-Executive'];
+        guests = data['member_counts']['Guest'];
+        allExceptGuests = data['all_except_guest_count'];
+      });
+    } else {
+      throw Exception('Failed to load member counts');
+    }
+  }
 
   Future<void> getBusinessCount() async {
     try {
@@ -221,6 +247,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
     visitorgetaccountBusinessCount();
     honorBusinessCount();
     honorgetaccountBusinessCount();
+    fetchMemberCounts();
     super.initState();
   }
 
@@ -321,7 +348,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
                         ),
                         onTap: () {
                           //  Navigator.push(context, MaterialPageRoute(builder: (context)=>const BusinessReport()));
-                          Navigator.pushNamed(context, '/business_report');
+                          // Navigator.pushNamed(context, '/business_report');
                           //   MaterialPageRoute(builder: (context)=> '/business_report'()));
                         },
                       ),
@@ -400,7 +427,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
                         ),
                         onTap: () {
                           //  Navigator.push(context, MaterialPageRoute(builder: (context)=>const BusinessReport()));
-                          Navigator.pushNamed(context, '/business_report');
+                          //Navigator.pushNamed(context, '/business_report');
                           //   MaterialPageRoute(builder: (context)=> '/business_report'()));
                         },
                       ),
@@ -485,7 +512,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
                         ),
                         onTap: () {
                           //  Navigator.push(context, MaterialPageRoute(builder: (context)=>const BusinessReport()));
-                          Navigator.pushNamed(context, '/business_report');
+                          //Navigator.pushNamed(context, '/business_report');
                           //   MaterialPageRoute(builder: (context)=> '/business_report'()));
                         },
                       ),
@@ -564,7 +591,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
                         ),
                         onTap: () {
                           //  Navigator.push(context, MaterialPageRoute(builder: (context)=>const BusinessReport()));
-                          Navigator.pushNamed(context, '/business_report');
+                          //Navigator.pushNamed(context, '/business_report');
                           //   MaterialPageRoute(builder: (context)=> '/business_report'()));
                         },
                       ),
@@ -607,7 +634,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
                                     height: 15,
                                   ),
                                   Text(
-                                    exemem.toString(),
+                                    mens!,
                                     style: const TextStyle(
                                       fontSize: 18,
                                       color: Colors.white,
@@ -640,10 +667,10 @@ class _MainScreenPageState extends State<MainScreenPage> {
                               )),
                         ),
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ExeMember()));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => ExeMember()));
                           //  Navigator.pushNamed(context, '/executive_member');
                         },
                       ),
@@ -685,7 +712,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
                                     height: 10,
                                   ),
                                   Text(
-                                    wexemem.toString(),
+                                    womens!,
                                     style: const TextStyle(
                                         fontSize: 18, color: Colors.white),
                                   ),
@@ -704,10 +731,10 @@ class _MainScreenPageState extends State<MainScreenPage> {
                               )),
                         ),
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => WExecutive()));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => WExecutive()));
                           //  Navigator.pushNamed(context, '/women_executive_member');
                         },
                       ),
@@ -750,7 +777,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
                                   height: 10,
                                 ),
                                 Text(
-                                  doctor.toString(),
+                                  doctors!,
                                   style: const TextStyle(
                                       fontSize: 18, color: Colors.white),
                                 ),
@@ -770,10 +797,10 @@ class _MainScreenPageState extends State<MainScreenPage> {
                           ),
                         ),
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => DoctorsWing()));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => DoctorsWing()));
                         },
                       ),
 
@@ -849,7 +876,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
                                     height: 10,
                                   ),
                                   Text(
-                                    tnonexe.toString(),
+                                    nonExec!,
                                     style: const TextStyle(
                                         fontSize: 18, color: Colors.white),
                                   ),
@@ -868,10 +895,10 @@ class _MainScreenPageState extends State<MainScreenPage> {
                               )),
                         ),
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NonExecutive()));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => NonExecutive()));
                           // Navigator.pushNamed(context, '/non_executive');
                         },
                       ),
@@ -914,7 +941,7 @@ class _MainScreenPageState extends State<MainScreenPage> {
                                   height: 10,
                                 ),
                                 Text(
-                                  totalgib.toString(),
+                                  allExceptGuests!,
                                   style: const TextStyle(
                                       fontSize: 18, color: Colors.white),
                                 ),
@@ -934,10 +961,10 @@ class _MainScreenPageState extends State<MainScreenPage> {
                           ),
                         ),
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TotalMembers()));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => TotalMembers()));
                         },
                       ),
                       //Current Year Transaction(From Thank note)
